@@ -1,0 +1,118 @@
+html, body {
+  margin: 0;
+  height: 100%;
+  background-color: rgba(30, 255, 30, 0.3);
+  overflow: hidden
+}
+
+
+.start {
+  margin: 50px;
+  background-color: white;
+  padding: 20px 30px;
+}
+
+.auth {
+  margin-top: 30px;
+}
+
+.result {
+  font-size: 4em;
+  padding-top: 180px;
+  padding-bottom: 50px;
+}
+
+.join-game {
+  max-width: 800px;
+  margin: 60px auto;
+  font-size: 1.4em;
+  background-color: white;
+  padding: 20px;
+  border-radius: 5px;
+}
+
+span.sell {
+  float: left;
+}
+
+span.buy {
+  float: right;
+}
+
+span.sell, span.buy {
+  font-size: 1.3em;
+  color: rgb(20, 20, 20);
+  position: relative;
+  top: -5px;
+}
+
+#trade  {
+  -webkit-appearance: none ;
+  outline: none;
+  background-color: inherit;
+}
+#trade::-webkit-slider-runnable-track {
+  -webkit-appearance: none ;
+  appearance: none ;
+  border-radius: 5px;
+  /* box-shadow: inset 1px 1px 1px rgba(000,000,000,0.10); */
+  background-color: rgb(180, 180, 180);
+  height: 8px;
+  vertical-align:middle;
+  border: none;
+  cursor: pointer;
+}
+#trade::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  border-radius: 100%;
+  background-color: #037cd5;
+  /* box-shadow: inset 0 0 0 4px #CCC, inset 0 0 4px #CCC, inset 0 0 0 4px #CCC; */
+  height: 22px;
+  width: 22px;
+  vertical-align:middle;
+  border: none;
+  cursor: pointer;
+  margin-top: -6px;
+}
+#trade::-moz-range-track{
+  -moz-appearance: none ;
+  border-radius: 5px;
+  /* box-shadow: inset 1px 1px 1px rgba(000,000,000,0.10); */
+  background-color: #CCC;
+  height: 8px;
+  vertical-align:middle;
+  margin:0; padding:0;
+  border: none;
+  cursor: pointer;
+}
+#trade::-moz-range-thumb {
+  -moz-appearance: none ;
+  border-radius: 100%;
+  background-color: #037cd5;
+  /* box-shadow: inset 0 0 0 4px #CCC, inset 0 0 4px #CCC, inset 0 0 0 4px #CCC; */
+  height: 22px;
+  width: 22px;
+  vertical-align:middle;
+  border: none;
+  cursor: pointer;
+  margin-top: -6px;
+}
+#trade:active::-moz-range-thumb {
+  background: #fdd921;
+}
+#trade::-ms-track {
+  width: 100%;
+  height: 8px;
+  cursor: pointer;
+  animate: 0.2s;
+  background: transparent;
+  border-color: transparent;
+  border-width: 39px 0;
+  color: transparent;
+}
+#trade::-ms-fill-lower {
+  background: #CCC;
+  border: 0px solid #000101;
+  border-radius: 50px;
+  /* box-shadow: 0px 0px 0px #000000, 0px 0px 0px #0d0d0d; */
+}
