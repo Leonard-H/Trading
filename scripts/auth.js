@@ -2,6 +2,15 @@ class Authentication{
   constructor(div){
     this.div = div;
   }
+  addAdminCloudFunction(adminForm){
+    adminForm.addEventListener("submit", e => {
+      e.preventDefault();
+      const adminEmail = adminForm.email.value;
+      const addAdminRole = functions.httpsCallable("addAdminRole");
+      addAdminRole({ email: adminEmail })
+        .then(console.log("result"));
+    });
+  }
   signup(){
     const html = `
     <form class="signup-form">
