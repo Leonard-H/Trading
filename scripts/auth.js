@@ -3,12 +3,13 @@ class Authentication{
     this.div = div;
   }
   addAdminCloudFunction(adminForm){
-    adminForm.addEventListener("submit", e => {
+    adminForm.addEventListener('submit', (e) => {
       e.preventDefault();
       const adminEmail = adminForm.email.value;
-      const addAdminRole = functions.httpsCallable("addAdminRole");
-      addAdminRole({ email: adminEmail })
-        .then(console.log("result"));
+      const addAdminRole = functions.httpsCallable('addAdminRole');
+      addAdminRole({ email: adminEmail }).then(result => {
+        console.log(result);
+      });
     });
   }
   signup(){

@@ -25,32 +25,15 @@ const enable = () => {
 
 
 
-//authentication
+// authentication
 signup.addEventListener("click", () => {
   authentication.signup();
 });
 
-login.addEvent})
-
-document.querySelector(".add-admin").addEventListener("click", () => {
-  join.classList.add("d-none");
-  const addAdminForm = document.querySelector(".add-admin-form");
-
-  addAdminForm.classList.remove("d-none");
-
-  document.querySelector(".home-btn").addEventListener("click", () => {
-    addAdminForm.classList.add("d-none");
-    join.classList.remove("d-none");
-  });
-
-});
-
-
-//class instances
-const authentication = new Authentication(authDiv);
-Listener("click", () => {
+login.addEventListener("click", () => {
   authentication.login();
-})
+});
+
 
 document.querySelector(".add-admin").addEventListener("click", () => {
   join.classList.add("d-none");
@@ -66,12 +49,14 @@ document.querySelector(".add-admin").addEventListener("click", () => {
 });
 
 
+
 //class instances
 const authentication = new Authentication(authDiv);
 
-
-//function that prepares user environment
 const setUpUser = user => {
+
+  authentication.addAdminCloudFunction(document.querySelector(".add-admin-form"));
+
 
   nav.classList.remove("d-none");
   start.classList.add("d-none");
@@ -100,7 +85,7 @@ authentication.listener(user => {
     .get()
     .then(data => {
       if (data.data()){
-        setUpUser(user);
+        setUpUser(user)
       } else {
 
           const html = `
