@@ -10,18 +10,9 @@ const main = document.querySelector(".main");
 const resultDiv = document.querySelector(".result");
 const account = document.querySelector(".account");
 const logout = document.querySelector(".logout-confirmed")
-const join = document.querySelector(".join-game")
-
-range.addEventListener("change", () => {
-  resultDiv.textContent = range.value + ", wait";
-  range.setAttribute("disabled", true);
-
-});
-
-const enable = () => {
-  range.removeAttribute("disabled");
-  resultDiv.textContent = "";
-};
+const join = document.querySelector(".join-game");
+const joinForm = document.querySelector(".join-form");
+const display = document.querySelector(".display");
 
 
 
@@ -49,6 +40,62 @@ document.querySelector(".add-admin").addEventListener("click", () => {
 });
 
 
+joinForm.addEventListener("submit", e => {
+  e.preventDefault();
+  const value = joinForm.enter.value;
+  if (value){
+    join.classList.add("d-none");
+    main.classList.remove("d-none");
+
+    //setup game
+
+    const resetDisplayStyle = () => {
+      display.classList.remove("btn", "btn-dark", "text-muted");
+      display.classList.add("font-weight-bold");
+    };
+
+    localStorage.counter = 0;
+
+    range.addEventListener("change", () => {
+      resultDiv.textContent = range.value + ", wait";
+      range.setAttribute("disabled", true);
+      localStorage.counter = range.value;
+      display.classList.remove("text-muted");
+      display.classList.add("btn", "btn-dark");
+    });
+
+    range.addEventListener("mousedown", () => {
+      display.classList.add("text-muted");
+      display.classList.remove("btn", "btn-dark", "font-weight-bold");
+    });
+
+    range.addEventListener("input", e => {
+      display.classList.remove("d-none");
+      display.innerText = e.target.value;
+    });
+
+    range.addEventListener("mouseup", () => {
+      console.log(localStorage.counter, range.value, localStorage.counter == range.value);
+      if (localStorage.counter == range.value){
+        resetDisplayStyle();
+      }
+    });
+
+    const enable = () => {
+      range.removeAttribute("disabled");
+    };
+
+    display.addEventListener("click", e => {
+      if (e.target.classList.contains("btn")){
+        resetDisplayStyle();
+        enable();
+      }
+    });
+
+  }
+});
+
+
 
 //class instances
 const authentication = new Authentication(authDiv);
@@ -62,8 +109,7 @@ const setUpUser = user => {
   start.classList.add("d-none");
   join.classList.remove("d-none");
 
-
-  // main.classList.remove("d-none");
+  joinForm.enter.focus();
 
   account.innerHTML = `Your email address: ${user.email}`;
 
@@ -85,7 +131,7 @@ authentication.listener(user => {
     .get()
     .then(data => {
       if (data.data()){
-        setUpUser(user)
+        setUpUser(user);
       } else {
 
           const html = `

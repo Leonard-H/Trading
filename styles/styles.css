@@ -18,7 +18,7 @@ html, body {
 
 .result {
   font-size: 4em;
-  padding-top: 180px;
+  padding-top: 80px;
   padding-bottom: 50px;
 }
 
@@ -39,6 +39,16 @@ span.buy {
   float: right;
 }
 
+span.display {
+  display: block;
+  margin: 0 auto;
+  position: relative;
+  top: -3px;
+  max-width: 50px;
+  padding: 2px 4px;
+  text-align: center;
+}
+
 span.sell, span.buy {
   font-size: 1.3em;
   color: rgb(20, 20, 20);
@@ -50,6 +60,7 @@ span.sell, span.buy {
   -webkit-appearance: none ;
   outline: none;
   background-color: inherit;
+  position: relative;
 }
 #trade::-webkit-slider-runnable-track {
   -webkit-appearance: none ;

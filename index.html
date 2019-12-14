@@ -89,10 +89,10 @@
 
 
   <div class="join-game white-card d-none">
-    <form>
+    <form class="join-form">
       <div class="form-group">
         <label for="enter-game">Join game</label>
-        <input type="text" class="form-control" id="enter-game" placeholder="Enter game">
+        <input type="text" class="form-control" id="enter" placeholder="Enter game" autocomplete="off">
       </div>
     </form>
   </div>
@@ -107,7 +107,8 @@
         <div class="form-group">
           <span class="sell font-weight-bold">sell</span>
           <span class="buy font-weight-bold">buy</span>
-          <input type="range" class="form-control-range" id="trade" min="0" max="2" value="1">
+          <span class="display font-weight-bold">0</span>
+          <input type="range" class="form-control-range" id="trade" min="-10" max="10" value="0">
         </div>
       </form>
 
