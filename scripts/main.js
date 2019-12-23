@@ -95,6 +95,25 @@ joinForm.addEventListener("submit", e => {
   }
 });
 
+const newSession = async (data, context) => {
+  db.collection("sessions").doc(data.id).set({
+    isLive: true
+  }).catch(err => console.log(err))
+};
+
+const addValue = async (data, context) => {
+  db.collection("valuesOfChart").doc(data.index).set({
+      ofSession: data.id,
+      timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+      value: data.value
+  })
+};
+
+const stopSession = async (data, context) => {
+  db.collection("sessions").doc(data.id).update({
+    isLive: false
+  }).catch(err => console.log(err))
+};
 
 
 //class instances
@@ -111,7 +130,15 @@ const setUpUser = user => {
 
   joinForm.enter.focus();
 
-  account.innerHTML = `Your email address: ${user.email}`;
+  db.collection("users").doc(auth.currentUser.uid)
+    .get()
+    .then(data => {
+      account.innerHTML = `
+        <span>Your email address: '${user.email}'</span><br>
+        <span>Your name: '${data.data().username}</span><br>
+        <small class="text-muted">Unfortunately, you can't edit your account yet.</small>
+      `;
+    })
 
   logout.addEventListener("click", () => {
     auth.signOut();
