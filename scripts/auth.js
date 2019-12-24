@@ -9,7 +9,7 @@ class Authentication{
       const addAdminRole = functions.httpsCallable('addAdminRole');
       addAdminRole({ email: adminEmail }).then(result => {
         console.log(result);
-        togglaActiveCard(join);
+        toggleActiveCard(join);
       }).catch(err => {
         console.log(err);
         alert("There was an error: view console");
@@ -116,7 +116,7 @@ class Authentication{
             callback(user);
           })
 
-        
+
       } else {
         this.div.innerHTML = "";
         this.user = undefined;
