@@ -9,6 +9,10 @@ class Authentication{
       const addAdminRole = functions.httpsCallable('addAdminRole');
       addAdminRole({ email: adminEmail }).then(result => {
         console.log(result);
+        togglaActiveCard(join);
+      }).catch(err => {
+        console.log(err);
+        alert("There was an error: view console");
       });
     });
   }
@@ -105,8 +109,14 @@ class Authentication{
 
     auth.onAuthStateChanged(user => {
       if (user){
-        //get reference to user
-        callback(user);
+
+        user.getIdTokenResult()
+          .then(idTokenResult => {
+            user.admin = idTokenResult.claims.admin;
+            callback(user);
+          })
+
+        
       } else {
         this.div.innerHTML = "";
         this.user = undefined;

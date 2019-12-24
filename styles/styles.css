@@ -31,6 +31,10 @@ html, body {
   border-radius: 5px;
 }
 
+.game-control {
+  font-size: 1.15em;
+}
+
 span.sell {
   float: left;
 }

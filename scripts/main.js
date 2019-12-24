@@ -4,12 +4,14 @@ const authDiv = document.querySelector(".auth");
 const signup = document.querySelector(".signup");
 const login = document.querySelector(".login");
 
+const gameControl = document.querySelector(".game-control");
+
 const range = document.querySelector("input[type=\"range\"]");
 const nav = document.querySelector("nav");
 const main = document.querySelector(".main");
 const resultDiv = document.querySelector(".result");
 const account = document.querySelector(".account");
-const logout = document.querySelector(".logout-confirmed")
+const logout = document.querySelector(".logout-confirmed");
 const join = document.querySelector(".join-game");
 const joinForm = document.querySelector(".join-form");
 const display = document.querySelector(".display");
@@ -25,21 +27,107 @@ login.addEventListener("click", () => {
   authentication.login();
 });
 
+// admin ui
 
-document.querySelector(".add-admin").addEventListener("click", () => {
-  join.classList.add("d-none");
-  const addAdminForm = document.querySelector(".add-admin-form");
-
-  addAdminForm.classList.remove("d-none");
-
-  document.querySelector(".home-btn").addEventListener("click", () => {
-    addAdminForm.classList.add("d-none");
-    join.classList.remove("d-none");
+const toggleActiveCard = card => {
+  [...document.querySelector(".white-cards").children].forEach(child => {
+    child.classList.add("d-none");
   });
+  card.classList.remove("d-none");
+};
 
+document.querySelector(".home-btn").addEventListener("click", () => {
+  toggleActiveCard(join);
 });
 
+document.querySelector(".add-admin").addEventListener("click", () => {
+  toggleActiveCard(document.querySelector(".add-admin-form"));
+});
 
+document.querySelector(".new-session").addEventListener("click", e => {
+  e.preventDefault();
+
+  const htmlInitSession = `
+    <form class="init-session">
+      <div class="form-group">
+        <label for="sessionId">Give the session an id:</label>
+        <input type="text" class="form-control" id="sessionId" placeholder="Session id" autocomplete="off" required>
+      </div>
+      <div class="form-group">
+        <label for="stock">Type in the name of the stock:</label>
+        <input type="text" class="form-control" id="stock" placeholder="Stock name"autocomplete="off" required>
+      </div>
+      <button type="submit" class="btn btn-dark">Submit</button>
+    </form>
+  `;
+
+  gameControl.innerHTML = htmlInitSession;
+
+  const initForm = document.querySelector(".init-session");
+
+  let sessionId;
+
+  initForm.addEventListener("submit", e => {
+    e.preventDefault();
+
+    sessionId = initForm.sessionId.value;
+
+    game.newSession({
+      id: sessionId,
+      stockName: initForm.stock.value,
+      creator: auth.currentUser.uid
+    })
+    .then(() => {
+      gameControl.innerHTML = `
+        <div class="text-center content-div">
+          <span style="color: lime; font-size: 2em; font-weight: bold">&#10003;</span><br>
+          <span>Success! Now share the id with your friends.</span>
+        </div>
+        <div class="text-center">
+          <button class="next btn btn-dark" style="margin-top: 20px;">next</button>
+        <div>
+      `;
+
+      const contentDiv = document.querySelector(".content-div");
+      const next = document.querySelector(".next");
+
+      next.onclick = () => {
+        setTimeout(() => next.blur(), 50);
+        contentDiv.innerHTML = `
+          <h1>${sessionId}</h1>
+        `;
+        next.onclick = () => {
+
+          gameControl.innerHTML = `
+            <form class="add-value">
+              <div class="form-group">
+                <label for="sessionId">New value:</label>
+                <input type="text" class="form-control" id="value" placeholder="value" autocomplete="off" required>
+              </div>
+              <button type="submit" class="btn btn-dark">Submit</button>
+            </form>
+          `;
+        };
+      };
+
+
+    })
+    .catch(err => {
+      console.log(err);
+      alert("There was an error: view console");
+    });
+
+
+
+
+  });
+
+
+  toggleActiveCard(gameControl);
+})
+
+
+// general ui
 joinForm.addEventListener("submit", e => {
   e.preventDefault();
   const value = joinForm.enter.value;
@@ -95,58 +183,50 @@ joinForm.addEventListener("submit", e => {
   }
 });
 
-const newSession = async (data, context) => {
-  db.collection("sessions").doc(data.id).set({
-    isLive: true
-  }).catch(err => console.log(err))
-};
 
-const addValue = async (data, context) => {
-  db.collection("valuesOfChart").doc(data.index).set({
-      ofSession: data.id,
-      timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-      value: data.value
-  })
-};
-
-const stopSession = async (data, context) => {
-  db.collection("sessions").doc(data.id).update({
-    isLive: false
-  }).catch(err => console.log(err))
-};
 
 
 //class instances
 const authentication = new Authentication(authDiv);
+const game = new Game();
 
 const setUpUser = user => {
 
   authentication.addAdminCloudFunction(document.querySelector(".add-admin-form"));
-
-
-  nav.classList.remove("d-none");
-  start.classList.add("d-none");
-  join.classList.remove("d-none");
-
-  joinForm.enter.focus();
 
   db.collection("users").doc(auth.currentUser.uid)
     .get()
     .then(data => {
       account.innerHTML = `
         <span>Your email address: '${user.email}'</span><br>
-        <span>Your name: '${data.data().username}</span><br>
-        <small class="text-muted">Unfortunately, you can't edit your account yet.</small>
+        <span>Your name: '${data.data().username}'</span><br>
+        <span class="admin">You are an admin</span>
+        <p><small class="text-muted">Unfortunately, you can't edit your account yet.</small></p>
       `;
+
+      if (user.admin){
+        document.querySelectorAll(".admin").forEach(el => {
+          el.classList.remove("d-none");
+        })
+      } else {
+        document.querySelectorAll(".admin").forEach(el => {
+          el.classList.add("d-none");
+        })
+      }
+
+      nav.classList.remove("d-none");
+      start.classList.add("d-none");
+      toggleActiveCard(join);
+
+      joinForm.enter.focus();
+
     })
 
   logout.addEventListener("click", () => {
     auth.signOut();
 
     nav.classList.add("d-none");
-    start.classList.remove("d-none");
-    join.classList.add("d-none");
-    main.classList.add("d-none");
+    toggleActiveCard(start);
 
   });
 }
