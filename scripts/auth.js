@@ -35,7 +35,7 @@ class Authentication{
       </div>
       <button type="submit" class="btn btn-dark">Submit</button>
     </form>
-    <div class="error"></div>
+    <div class="error text-danger d-none"></div>
     `;
 
     this.div.innerHTML = html;
@@ -60,7 +60,10 @@ class Authentication{
         this.div.classList.add("d-none");
 
         auth.createUserWithEmailAndPassword(email.value, password.value)
-          .catch(err => error.textContent = err);
+          .catch(err => {
+            error.textContent = err;
+            error.classList.remove("d-none");
+          });
       } else {
         confirm.value = "";
         error.innerHTML = "Password and Confirm Password are not the same"
@@ -84,7 +87,7 @@ class Authentication{
         </div>
         <button type="submit" class="btn btn-dark">Submit</button>
       </form>
-      <div class="error"></div>
+      <div class="error text-danger d-none"></div>
     `;
 
     this.div.innerHTML = html;
@@ -102,7 +105,10 @@ class Authentication{
 
       //login
       auth.signInWithEmailAndPassword(email.value, password.value)
-        .catch(err => console.log(err));
+        .catch(err => {
+          error.textContent = err;
+          error.classList.remove("d-none");
+        });
     });
   }
   listener(callback){

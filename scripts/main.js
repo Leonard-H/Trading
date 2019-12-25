@@ -27,6 +27,8 @@ login.addEventListener("click", () => {
   authentication.login();
 });
 
+
+
 // admin ui
 
 const toggleActiveCard = card => {
@@ -98,15 +100,41 @@ document.querySelector(".new-session").addEventListener("click", e => {
         `;
         next.onclick = () => {
 
-          gameControl.innerHTML = `
-            <form class="add-value">
-              <div class="form-group">
-                <label for="sessionId">New value:</label>
-                <input type="text" class="form-control" id="value" placeholder="value" autocomplete="off" required>
-              </div>
-              <button type="submit" class="btn btn-dark">Submit</button>
-            </form>
-          `;
+
+          db.collection("users").doc(auth.currentUser.uid).get()
+            .then(data => {
+
+              gameControl.innerHTML = `
+                <form class="add-value">
+                  <div class="form-group">
+                    <label for="sessionId">New value:</label>
+                    <input type="text" class="form-control" id="value" placeholder="value" autocomplete="off" required>
+                  </div>
+                  <button type="submit" class="btn btn-dark">Submit</button>
+                  <button type="button" class="btn btn-dark" style="float: right" data-toggle="modal" data-target="#endSessionModal">End session</button>
+                </form>
+              `;
+
+              // add a value
+              const addValueForm = document.querySelector(".add-value");
+              addValueForm.addEventListener("submit", e => {
+                e.preventDefault();
+
+
+              });
+
+
+              // end the session
+              const end = document.querySelector(".session-end-confirmed");
+              end.addEventListener("click", () => {
+                game.endSession({ id:  data.data().currentSession });
+              });
+
+            })
+            .catch(err => console.log(err))
+
+
+
         };
       };
 
@@ -237,7 +265,7 @@ authentication.listener(user => {
   db.collection("users").doc(user.uid)
     .get()
     .then(data => {
-      if (data.data()){
+      if (data.data().username){
         setUpUser(user);
       } else {
 
@@ -261,7 +289,9 @@ authentication.listener(user => {
 
             db.collection("users").doc(user.uid)
               .set({
-                username: form.name.value
+                username: form.name.value,
+                currentSession: "",
+                occupatiedAsAdmin: false
               })
               .then(() => {
                 setUpUser(user);
