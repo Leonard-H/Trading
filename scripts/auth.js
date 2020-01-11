@@ -52,9 +52,6 @@ class Authentication{
     form.addEventListener("submit", e => {
       e.preventDefault();
 
-
-      console.log(password.value, confirm.value);
-
       //signup
       if (password.value === confirm.value){
         this.div.classList.add("d-none");
@@ -64,6 +61,10 @@ class Authentication{
             error.textContent = err;
             error.classList.remove("d-none");
           });
+
+
+
+
       } else {
         confirm.value = "";
         error.innerHTML = "Password and Confirm Password are not the same"
@@ -128,10 +129,5 @@ class Authentication{
         this.user = undefined;
       }
     });
-  }
-  async getUser(){
-    return await db.collection("users").doc(auth.W)
-      .get()
-      .then(data => data.data())
   }
 }

@@ -98,44 +98,7 @@ document.querySelector(".new-session").addEventListener("click", e => {
         contentDiv.innerHTML = `
           <h1>${sessionId}</h1>
         `;
-        next.onclick = () => {
-
-
-          db.collection("users").doc(auth.currentUser.uid).get()
-            .then(data => {
-
-              gameControl.innerHTML = `
-                <form class="add-value">
-                  <div class="form-group">
-                    <label for="sessionId">New value:</label>
-                    <input type="text" class="form-control" id="value" placeholder="value" autocomplete="off" required>
-                  </div>
-                  <button type="submit" class="btn btn-dark">Submit</button>
-                  <button type="button" class="btn btn-dark" style="float: right" data-toggle="modal" data-target="#endSessionModal">End session</button>
-                </form>
-              `;
-
-              // add a value
-              const addValueForm = document.querySelector(".add-value");
-              addValueForm.addEventListener("submit", e => {
-                e.preventDefault();
-
-
-              });
-
-
-              // end the session
-              const end = document.querySelector(".session-end-confirmed");
-              end.addEventListener("click", () => {
-                game.endSession({ id:  data.data().currentSession });
-              });
-
-            })
-            .catch(err => console.log(err))
-
-
-
-        };
+        next.onclick = gameControlFunction;
       };
 
 
@@ -155,61 +118,181 @@ document.querySelector(".new-session").addEventListener("click", e => {
 })
 
 
+const gameControlFunction =  () => {
+
+
+  db.collection("users").doc(auth.currentUser.uid).get()
+    .then(data => {
+
+      gameControl.innerHTML = `
+        <form class="add-value">
+          <div class="form-group">
+            <label for="sessionId">New value:</label>
+            <input type="text" class="form-control" id="value" placeholder="value" autocomplete="off" required>
+          </div>
+          <button type="submit" class="btn btn-dark">Submit</button>
+          <button type="button" class="btn btn-dark" style="float: right" data-toggle="modal" data-target="#endSessionModal">End session</button>
+        </form>
+      `;
+
+      // add a value
+      const addValueForm = document.querySelector(".add-value");
+      addValueForm.addEventListener("submit", e => {
+        e.preventDefault();
+
+        game.addValue({ id: data.data().currentSession, value: addValueForm.value.value });
+        addValueForm.value.value = "";
+
+      });
+
+
+      // end the session
+      const end = document.querySelector(".session-end-confirmed");
+      end.addEventListener("click", () => {
+        game.endSession({ id:  data.data().currentSession })
+          .then(toggleActiveCard(join));;
+      });
+
+
+    })
+    .catch(err => console.log(err))
+
+
+
+};
+
+
 // general ui
 joinForm.addEventListener("submit", e => {
   e.preventDefault();
-  const value = joinForm.enter.value;
-  if (value){
-    join.classList.add("d-none");
-    main.classList.remove("d-none");
 
-    //setup game
-
-    const resetDisplayStyle = () => {
-      display.classList.remove("btn", "btn-dark", "text-muted");
-      display.classList.add("font-weight-bold");
-    };
-
-    localStorage.counter = 0;
-
-    range.addEventListener("change", () => {
-      resultDiv.textContent = range.value + ", wait";
-      range.setAttribute("disabled", true);
-      localStorage.counter = range.value;
-      display.classList.remove("text-muted");
-      display.classList.add("btn", "btn-dark");
-    });
-
-    range.addEventListener("mousedown", () => {
-      display.classList.add("text-muted");
-      display.classList.remove("btn", "btn-dark", "font-weight-bold");
-    });
-
-    range.addEventListener("input", e => {
-      display.classList.remove("d-none");
-      display.innerText = e.target.value;
-    });
-
-    range.addEventListener("mouseup", () => {
-      console.log(localStorage.counter, range.value, localStorage.counter == range.value);
-      if (localStorage.counter == range.value){
-        resetDisplayStyle();
-      }
-    });
-
-    const enable = () => {
-      range.removeAttribute("disabled");
-    };
-
-    display.addEventListener("click", e => {
-      if (e.target.classList.contains("btn")){
-        resetDisplayStyle();
-        enable();
-      }
-    });
-
-  }
+  setUpSession(joinForm.enter.value, 0);
+  game.addUserValue({ id: joinForm.enter.value, value: 0 });
 });
+
+
+// function which starts session ui
+
+const setUpSession = (id, firstNum) => {
+
+  db.collection("sessions").doc(id).get()
+    .then(ses => {
+      if (ses.data()){
+
+        if (ses.data().isLive){
+
+
+          if (id){
+            // backend
+            game.joinGame({ session: id })
+              .then(() => {
+                join.classList.add("d-none");
+                main.classList.remove("d-none");
+
+                //setup game
+                localStorage.rangeVal = firstNum;
+                range.value = firstNum;
+                display.innerText = firstNum;
+
+
+                const resetDisplayStyle = () => {
+                  display.classList.remove("btn", "btn-dark", "text-muted");
+                  display.classList.add("font-weight-bold");
+                };
+
+                range.addEventListener("change", () => {
+                  localStorage.rangeVal = range.value;
+                  display.classList.remove("text-muted");
+                  display.classList.add("btn", "btn-dark");
+                });
+
+                range.addEventListener("mousedown", () => {
+                  display.classList.add("text-muted");
+                  display.classList.remove("btn", "btn-dark", "font-weight-bold");
+                });
+
+                range.addEventListener("input", e => {
+                  display.classList.remove("d-none");
+                  display.innerText = e.target.value;
+                });
+
+                range.addEventListener("mouseup", () => {
+                  console.log(localStorage.counter, range.value, localStorage.counter == range.value);
+                  if (localStorage.counter == range.value){
+                    resetDisplayStyle();
+                  }
+                });
+
+                const enable = () => {
+                  range.removeAttribute("disabled");
+                };
+
+                display.addEventListener("click", e => {
+                  if (e.target.classList.contains("btn")){
+                    resultDiv.textContent = range.value + ", wait";
+                    range.setAttribute("disabled", true);
+                    resetDisplayStyle();
+                  }
+                });
+              })
+
+              const unsub1 = db.collection("users").doc(auth.currentUser.uid)
+                .onSnapshot(doc => {
+                  db.collection("users").doc(doc.id).get()
+                    .then(data => {
+                      if (!data.data().currentSession){
+                        alert("the session has ended");
+                        toggleActiveCard(join);
+                        setTimeout(unsub1, 1000);
+                      }
+                    });
+
+                });
+
+
+          }
+
+
+
+        } else {
+
+          toggleActiveCard(join);
+          alert("the session has ended");
+
+        }
+
+
+      } else {
+
+        toggleActiveCard(join);
+        alert("there is no such session")
+
+      }
+    })
+
+
+
+    // scoring
+
+    db.collection("users").doc(auth.currentUser.uid)
+      .get()
+      .then(user => {
+        const unsub2 = db.collection("valuesOfChart")
+          .where("ofSession", "==", user.data().currentSession)
+          .onSnapshot(querySnapshot => {
+            db.collection("valuesOfChart")
+          });
+
+      });
+
+
+
+};
+
+
+
+
+
 
 
 
@@ -218,7 +301,7 @@ joinForm.addEventListener("submit", e => {
 const authentication = new Authentication(authDiv);
 const game = new Game();
 
-const setUpUser = user => {
+const setUpUser = (user, data) => {
 
   authentication.addAdminCloudFunction(document.querySelector(".add-admin-form"));
 
@@ -244,9 +327,20 @@ const setUpUser = user => {
 
       nav.classList.remove("d-none");
       start.classList.add("d-none");
-      toggleActiveCard(join);
 
-      joinForm.enter.focus();
+      // show users last activity
+      if (data.data().currentSession && data.data().occupiedAsAdmin){
+
+        gameControlFunction();
+        toggleActiveCard(gameControl);
+
+      } else if (data.data().currentSession && !data.data().occupiedAsAdmin){
+        setUpSession(data.data().currentSession, localStorage.rangeVal);
+
+      } else {
+        toggleActiveCard(join);
+        joinForm.enter.focus();
+      }
 
     })
 
@@ -265,41 +359,55 @@ authentication.listener(user => {
   db.collection("users").doc(user.uid)
     .get()
     .then(data => {
-      if (data.data().username){
-        setUpUser(user);
-      } else {
 
-          const html = `
-          <form class="nameForm">
-            <div class="form-group">
-              <label for="name">Type in your real name (first + last):</label>
-              <input type="text" class="form-control" id="name" placeholder="e.g. Donald Trump">
-            </div>
-            <button type="submit" class="btn btn-dark">Submit</button>
-          </form>
-          `;
+      const getName = () => {
+        const html = `
+        <form class="nameForm">
+          <div class="form-group">
+            <label for="name">Type in your real name (first + last):</label>
+            <input type="text" class="form-control" id="name" placeholder="e.g. Donald Trump">
+          </div>
+          <button type="submit" class="btn btn-dark">Submit</button>
+        </form>
+        `;
 
-          authDiv.innerHTML = html;
-          authDiv.classList.remove("d-none");
+        authDiv.innerHTML = html;
+        authDiv.classList.remove("d-none");
 
-          const form = document.querySelector(".nameForm");
+        const form = document.querySelector(".nameForm");
 
-          form.addEventListener("submit", e => {
-            e.preventDefault();
+        form.addEventListener("submit", e => {
+          e.preventDefault();
 
-            db.collection("users").doc(user.uid)
-              .set({
-                username: form.name.value,
-                currentSession: "",
-                occupatiedAsAdmin: false
-              })
-              .then(() => {
-                setUpUser(user);
-              })
-              .catch(err => console.log(err));
+          db.collection("users").doc(user.uid)
+            .set({
+              username: form.name.value,
+              currentSession: "",
+              occupiedAsAdmin: false
+            })
+            .then(() => {
+              setUpUser(user, data);
+            })
+            .catch(err => console.log(err));
 
           });
+      };
 
+
+
+      if (data.data()){
+        if (data.data().username){
+          setUpUser(user, data);
+        } else {
+          getName();
+          setUpUser(user, data);
+        }
+      } else {
+        getName();
+        db.collection("users").doc(auth.currentUser.uid).get()
+          .then(data => {
+            setUpUser(user, data);
+          })
       }
     })
 });
