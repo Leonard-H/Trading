@@ -307,30 +307,24 @@ const setUpSession = (id, firstNum) => {
 
                 let stockFactor;
 
+
+
                 if (first){
 
-                  game.createStockValueIdsArray(querySnapshot)
-                    .then(array => {
-                      console.log(array);
-                    })
+                  game.createStockValueIdsArray(querySnapshot, array => {
 
+                    if (array.length > 1){
 
-                  // db.collection("valuesOfChart").doc(stockValueIds[stockValueIds.length-1])
-                  //   .get()
-                  //   .then(val1 => {
-                  //
-                  //     db.collection("valuesOfChart").doc(stockValueIds[stockValueIds.length-2])
-                  //       .get()
-                  //       .then(val2 => {
-                  //         stockFactor = val1.data().value - val2.data().value;
-                  //         console.log(`${val1.data().value} - ${val2.data().value} is equal to ${stockFactor}`, stockValueIds);
-                  //       });
-                  //   });
+                      const chartFactor = array[array.length-1].value - array[array.length-2].value;
+                      console.log("Charfactor: " + chartFactor);
+
+                    }
+                  });
+
 
                 }
 
                 first = true;
-
 
               });
 

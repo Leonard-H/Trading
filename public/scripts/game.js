@@ -100,30 +100,23 @@ class Game {
   }
 
 
-  async createStockValueIdsArray(querySnapshot){
+  async createStockValueIdsArray(querySnapshot, callback){
+
 
     let stockValueIds = [];
 
-    return new Promise((resolve, reject) => {
+    querySnapshot.docs.forEach(doc => {
 
-      querySnapshot.docs.forEach(doc => {
+      stockValueIds.push({
+        value: doc.data().value,
+        // time1: Number(String(data.data().timestamp.seconds) + String(data.data().timestamp.nanoseconds)),
+        time: doc.data().timestamp.toDate().getTime()
+      });
+  });
 
-        db.collection("valuesOfChart").doc(doc.id)
-          .get()
-          .then(data => {
-             stockValueIds.push({
-               value: data.data().value,
-               // time1: Number(String(data.data().timestamp.seconds) + String(data.data().timestamp.nanoseconds)),
-               time: data.data().timestamp.toDate().getTime()
-             });
-          });
+    callback(stockValueIds);
 
-      })
-
-      resolve(stockValueIds);
-
-    });
-  }
+}
 
 
   async getScore(data){
