@@ -118,40 +118,55 @@ document.querySelector(".new-session").addEventListener("click", e => {
 })
 
 
-const gameControlFunction =  () => {
+const gameControlFunction = () => {
 
 
-  db.collection("users").doc(auth.currentUser.uid).get()
+  db.collection("users").doc(auth.currentUser.uid)
+    .get()
     .then(data => {
 
-      gameControl.innerHTML = `
-        <form class="add-value">
-          <div class="form-group">
-            <label for="sessionId">New value:</label>
-            <input type="text" class="form-control" id="value" placeholder="value" autocomplete="off" required>
-          </div>
-          <button type="submit" class="btn btn-dark">Submit</button>
-          <button type="button" class="btn btn-dark" style="float: right" data-toggle="modal" data-target="#endSessionModal">End session</button>
-        </form>
-      `;
+      db.collection("sessions").doc(data.data().currentSession)
+        .get()
+        .then(session => {
+          gameControl.innerHTML = `
+            <small class="text-muted" style="letter-spacing: 1.1px; float: left">
+              Session id:  ${data.data().currentSession}
+            </small>
+            <small class="text-muted" style="letter-spacing: 1.1px; float: right">
+              Stock: ${session.data().stock}
+            </small>
 
-      // add a value
-      const addValueForm = document.querySelector(".add-value");
-      addValueForm.addEventListener("submit", e => {
-        e.preventDefault();
+            <form class="add-value" style="margin-top: 35px">
+              <div class="form-group">
+                <label for="sessionId">New value:</label>
+                <input type="text" class="form-control" id="value" placeholder="value" autocomplete="off" required>
+              </div>
+              <button type="submit" class="btn btn-dark">Submit</button>
+              <button type="button" class="btn btn-dark" style="float: right" data-toggle="modal" data-target="#endSessionModal">End session</button>
+            </form>
+          `;
 
-        game.addValue({ id: data.data().currentSession, value: addValueForm.value.value });
-        addValueForm.value.value = "";
 
-      });
+            // add a value
+            const addValueForm = document.querySelector(".add-value");
+            addValueForm.addEventListener("submit", e => {
+              e.preventDefault();
+
+              game.addValue({ id: data.data().currentSession, value: addValueForm.value.value });
+              addValueForm.value.value = "";
+
+            });
 
 
-      // end the session
-      const end = document.querySelector(".session-end-confirmed");
-      end.addEventListener("click", () => {
-        game.endSession({ id:  data.data().currentSession })
-          .then(toggleActiveCard(join));;
-      });
+            // end the session
+            const end = document.querySelector(".session-end-confirmed");
+            end.addEventListener("click", () => {
+              game.endSession({ id:  data.data().currentSession })
+                .then(toggleActiveCard(join));;
+            });
+
+
+        });
 
 
     })
@@ -274,15 +289,52 @@ const setUpSession = (id, firstNum) => {
 
     // scoring
 
+
+
+    let first = false;
+
+
     db.collection("users").doc(auth.currentUser.uid)
       .get()
       .then(user => {
-        const unsub2 = db.collection("valuesOfChart")
-          .where("ofSession", "==", user.data().currentSession)
-          .onSnapshot(querySnapshot => {
-            db.collection("valuesOfChart")
-          });
+        db.collection("users").doc(auth.currentUser.uid)
+          .get()
+          .then(user => {
+            const unsub2 = db.collection("valuesOfChart")
+              .where("ofSession", "==", user.data().currentSession)
+              .orderBy("timestamp", "asc")
+              .onSnapshot(querySnapshot => {
 
+                let stockFactor;
+
+                if (first){
+
+                  game.createStockValueIdsArray(querySnapshot)
+                    .then(array => {
+                      console.log(array);
+                    })
+
+
+                  // db.collection("valuesOfChart").doc(stockValueIds[stockValueIds.length-1])
+                  //   .get()
+                  //   .then(val1 => {
+                  //
+                  //     db.collection("valuesOfChart").doc(stockValueIds[stockValueIds.length-2])
+                  //       .get()
+                  //       .then(val2 => {
+                  //         stockFactor = val1.data().value - val2.data().value;
+                  //         console.log(`${val1.data().value} - ${val2.data().value} is equal to ${stockFactor}`, stockValueIds);
+                  //       });
+                  //   });
+
+                }
+
+                first = true;
+
+
+              });
+
+          });
       });
 
 

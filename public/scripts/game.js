@@ -100,6 +100,32 @@ class Game {
   }
 
 
+  async createStockValueIdsArray(querySnapshot){
+
+    let stockValueIds = [];
+
+    return new Promise((resolve, reject) => {
+
+      querySnapshot.docs.forEach(doc => {
+
+        db.collection("valuesOfChart").doc(doc.id)
+          .get()
+          .then(data => {
+             stockValueIds.push({
+               value: data.data().value,
+               // time1: Number(String(data.data().timestamp.seconds) + String(data.data().timestamp.nanoseconds)),
+               time: data.data().timestamp.toDate().getTime()
+             });
+          });
+
+      })
+
+      resolve(stockValueIds);
+
+    });
+  }
+
+
   async getScore(data){
     /*  data must contain:
     *   session id as "id"
