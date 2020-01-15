@@ -76,8 +76,7 @@ document.querySelector(".new-session").addEventListener("click", e => {
 
     game.newSession({
       id: sessionId,
-      stockName: initForm.stock.value,
-      creator: auth.currentUser.uid
+      stockName: initForm.stock.value
     })
     .then(() => {
       gameControl.innerHTML = `
@@ -139,12 +138,33 @@ const gameControlFunction = () => {
             <form class="add-value" style="margin-top: 35px">
               <div class="form-group">
                 <label for="sessionId">New value:</label>
-                <input type="text" class="form-control" id="value" placeholder="value" autocomplete="off" required>
+                <div class="input-group">
+                  <input type="text" class="form-control" id="value" placeholder="value" autocomplete="off" required>
+                  <div class="input-group-append">
+                    <button type="submit" class="btn btn-dark">Submit</button>
+                  </div>
+                </div>
               </div>
-              <button type="submit" class="btn btn-dark">Submit</button>
+              <button type="button" class="btn btn-dark block">Block all users</button>
               <button type="button" class="btn btn-dark" style="float: right" data-toggle="modal" data-target="#endSessionModal">End session</button>
             </form>
           `;
+
+
+
+          let userList = [];
+
+          db.collection("users")
+            .where("currentSession", "==", data.data().currentSession)
+            .where("occupiedAsAdmin", "==", false)
+            .get()
+            .then(querySnapshot => {
+
+              querySnapshot.docs.forEach(doc => {
+                userList.push(doc.id);
+              });
+
+            });
 
 
             // add a value
@@ -155,6 +175,16 @@ const gameControlFunction = () => {
               game.addValue({ id: data.data().currentSession, value: addValueForm.value.value });
               addValueForm.value.value = "";
 
+
+              // enable users
+              userList.forEach(user => {
+                game.enable(user);
+              });
+
+
+
+
+
             });
 
 
@@ -164,6 +194,135 @@ const gameControlFunction = () => {
               game.endSession({ id:  data.data().currentSession })
                 .then(toggleActiveCard(join));;
             });
+
+
+
+
+
+            // listen for user values
+
+            let first = false;
+
+            db.collection("valuesOfUsers")
+              .where("ofSession", "==", data.data().currentSession)
+              .onSnapshot(querySnapshot => {
+
+
+                if (first){
+
+
+                  const change = querySnapshot.docChanges()[0];
+                  if (change.type === "added"){
+                    game.disable(change.doc.data().author);
+                  }
+
+                }
+
+                first = true;
+
+              });
+
+              // block button
+              const block = document.querySelector(".block");
+              block.addEventListener("click", () => {
+
+                userList.forEach(user => {
+
+                  game.disable(user);
+
+                });
+
+              });
+
+
+
+
+              //chartFactor
+              let first4 = false;
+
+              const unsub2 = db.collection("valuesOfChart")
+                .where("ofSession", "==", data.data().currentSession)
+                .orderBy("timestamp", "asc")
+                // "desc" would have been better but whatever
+                .onSnapshot(querySnapshot => {
+
+
+                  if (first4){
+                    querySnapshot.docChanges().forEach(change => {
+                      console.log(change.doc.data())
+                    });
+
+
+
+
+
+                    // delete unnecssary files to reduce number of reads
+                    if (querySnapshot.docs.length > 3){
+                      db.collection("valuesOfChart").doc(querySnapshot.docs[0].id).delete()
+                        .catch(err => console.log(err));
+                    }
+
+
+
+                    game.createStockValueIdsArray(querySnapshot, array => {
+
+                      if (array.length > 1 && querySnapshot.docChanges()[0].type === "added"){
+
+                        const chartFactor = array[array.length-1].value - array[array.length-2].value;
+
+                        let userValues = [];
+
+                        userList.forEach(user => {
+                          db.collection("valuesOfUsers")
+                            .where("author", "==", user)
+                            .where("ofSession", "==", data.data().currentSession)
+                            .orderBy("timestamp", "desc")
+                            .get()
+                            .then(querySnapshot => {
+
+                              const userFactor = querySnapshot.docs[0].data().value;
+
+                              const result = userFactor * chartFactor === -0 ? 0 : userFactor * chartFactor;
+
+
+
+                              db.collection("users").doc(user)
+                                .get()
+                                .then(data => {
+
+                                  const currentSession = data.data().currentSession;
+
+                                  const resultUntilNow = data.data()[currentSession] ? data.data()[currentSession] : 0;
+                                  const resultObject = {};
+                                  resultObject[data.data().currentSession] = resultUntilNow + result;
+
+                                  // console.log(resultObject[data.data().currentSession], data.data().username);
+
+                                  db.collection("users").doc(user).update(resultObject);
+
+                                });
+
+
+
+
+                            });
+                        });
+
+                      }
+                    });
+
+
+
+
+
+                  }
+
+                  first4 = true;
+
+                });
+
+
+
 
 
         });
@@ -182,13 +341,15 @@ joinForm.addEventListener("submit", e => {
   e.preventDefault();
 
   setUpSession(joinForm.enter.value, 0);
-  game.addUserValue({ id: joinForm.enter.value, value: 0 });
+  // game.addUserValue({ id: joinForm.enter.value, value: null });
 });
 
 
 // function which starts session ui
 
 const setUpSession = (id, firstNum) => {
+
+  let enable;
 
   db.collection("sessions").doc(id).get()
     .then(ses => {
@@ -201,6 +362,25 @@ const setUpSession = (id, firstNum) => {
             // backend
             game.joinGame({ session: id })
               .then(() => {
+
+
+
+                // find current result if any
+                db.collection("users").doc(auth.currentUser.uid)
+                  .get()
+                  .then(data => {
+                    if (data.data()[data.data().currentSession]){
+                      resultDiv.innerText = `$${data.data()[data.data().currentSession]}`;
+                    } else {
+                      resultDiv.innerText = `$${0}`;
+                    }
+                  });
+
+
+
+
+
+
                 join.classList.add("d-none");
                 main.classList.remove("d-none");
 
@@ -208,6 +388,9 @@ const setUpSession = (id, firstNum) => {
                 localStorage.rangeVal = firstNum;
                 range.value = firstNum;
                 display.innerText = firstNum;
+                if (!auth.currentUser.canAddValue){
+                  range.setAttribute("disabled", true);
+                }
 
 
                 const resetDisplayStyle = () => {
@@ -232,21 +415,23 @@ const setUpSession = (id, firstNum) => {
                 });
 
                 range.addEventListener("mouseup", () => {
-                  console.log(localStorage.counter, range.value, localStorage.counter == range.value);
-                  if (localStorage.counter == range.value){
+                  if (localStorage.rangeVal == range.value){
                     resetDisplayStyle();
                   }
                 });
 
-                const enable = () => {
+                enable = () => {
                   range.removeAttribute("disabled");
                 };
 
                 display.addEventListener("click", e => {
                   if (e.target.classList.contains("btn")){
-                    resultDiv.textContent = range.value + ", wait";
                     range.setAttribute("disabled", true);
                     resetDisplayStyle();
+
+
+                    game.addUserValue({ id: id, value: range.value });
+
                   }
                 });
               })
@@ -255,6 +440,9 @@ const setUpSession = (id, firstNum) => {
                 .onSnapshot(doc => {
                   db.collection("users").doc(doc.id).get()
                     .then(data => {
+
+
+                      // check if session ended
                       if (!data.data().currentSession){
                         alert("the session has ended");
                         toggleActiveCard(join);
@@ -285,51 +473,57 @@ const setUpSession = (id, firstNum) => {
       }
     })
 
+    let first3 = false;
+
+    db.collection("users").doc(auth.currentUser.uid)
+      .onSnapshot(querySnapshot => {
+
+
+        if (first3){
+          // display result
+
+          resultDiv.innerText = querySnapshot.data()[querySnapshot.data().currentSession] ? `$${querySnapshot.data()[querySnapshot.data().currentSession]}` : `$${0}`;
+
+
+
+          if (querySnapshot.data().canAddValues){
+            enable();
+          } else {
+            range.setAttribute("disabled", true);
+          }
+
+
+        }
+        first3 = true;
+      });
+
 
 
     // scoring
 
-
-
     let first = false;
+
 
 
     db.collection("users").doc(auth.currentUser.uid)
       .get()
       .then(user => {
-        db.collection("users").doc(auth.currentUser.uid)
-          .get()
-          .then(user => {
-            const unsub2 = db.collection("valuesOfChart")
-              .where("ofSession", "==", user.data().currentSession)
-              .orderBy("timestamp", "asc")
-              .onSnapshot(querySnapshot => {
-
-                let stockFactor;
+        const unsub2 = db.collection("valuesOfChart")
+          .where("ofSession", "==", user.data().currentSession)
+          .orderBy("timestamp", "asc")
+          .onSnapshot(querySnapshot => {
 
 
+            if (first){
+              enable();
+            }
 
-                if (first){
-
-                  game.createStockValueIdsArray(querySnapshot, array => {
-
-                    if (array.length > 1){
-
-                      const chartFactor = array[array.length-1].value - array[array.length-2].value;
-                      console.log("Charfactor: " + chartFactor);
-
-                    }
-                  });
-
-
-                }
-
-                first = true;
-
-              });
+            first = true;
 
           });
+
       });
+
 
 
 
@@ -429,7 +623,8 @@ authentication.listener(user => {
             .set({
               username: form.name.value,
               currentSession: "",
-              occupiedAsAdmin: false
+              occupiedAsAdmin: false,
+              canAddValues: false
             })
             .then(() => {
               setUpUser(user, data);

@@ -9,7 +9,7 @@ class Game {
       isLive: true,
       stock: data.stockName,
       timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-      creator: data.creator
+      creator: auth.currentUser.uid
     })
     .catch(err => {
       console.log(err);
@@ -76,7 +76,8 @@ class Game {
 
     db.collection("users").doc(auth.currentUser.uid).update({
       currentSession: data.session,
-      occupiedAsAdmin: false
+      occupiedAsAdmin: false,
+      canAddValues: false
     })
     .catch(err => {
       console.log(err);
@@ -87,15 +88,18 @@ class Game {
   }
 
   async addUserValue(data){
+
     db.collection("valuesOfUsers").add({
       ofSession: data.id,
       timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-      value: data.value
+      value: data.value,
+      author: auth.currentUser.uid
     })
     .catch(err => {
       console.log(err);
       alert("There was an error: view console");
     });
+
 
   }
 
@@ -110,29 +114,31 @@ class Game {
       stockValueIds.push({
         value: doc.data().value,
         // time1: Number(String(data.data().timestamp.seconds) + String(data.data().timestamp.nanoseconds)),
-        time: doc.data().timestamp.toDate().getTime()
+        // time: doc.data().timestamp.toDate().getTime()
       });
-  });
+    });
 
     callback(stockValueIds);
+}
 
+async disable(id){
+  // const disable = functions.httpsCallable('disable');
+  // disable({ uid: id })
+  db.collection("users").doc(id).update({
+    canAddValues: false
+  });
+}
+
+async enable(id){
+  // const enable = functions.httpsCallable('enable');
+  // enable({ uid: id })
+  db.collection("users").doc(id).update({
+    canAddValues: true
+  });
 }
 
 
-  async getScore(data){
-    /*  data must contain:
-    *   session id as "id"
-    *   player id as "user"
-    */
 
 
-
-
-
-
-
-
-
-  }
 
 }

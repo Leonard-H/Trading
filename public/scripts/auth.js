@@ -3,7 +3,7 @@ class Authentication{
     this.div = div;
   }
   addAdminCloudFunction(adminForm){
-    adminForm.addEventListener('submit', (e) => {
+    adminForm.addEventListener('submit', e => {
       e.preventDefault();
       const adminEmail = adminForm.email.value;
       const addAdminRole = functions.httpsCallable('addAdminRole');
@@ -22,7 +22,7 @@ class Authentication{
       <div class="form-group">
         <label for="inputEmail">Email address</label>
         <input type="email" class="form-control" id="inputEmail" aria-describedby="emailHelp" placeholder="Enter email" required>
-        <small id="emailHelp" class="form-text text-muted">I'll never share your email with anyone else.</small>
+        <small id="emailHelp" class="form-text text-muted">Please DON'T user your school email-address to sign up.</small>
       </div>
       <div class="form-group">
         <label for="inputPassword">Password</label>
@@ -120,8 +120,15 @@ class Authentication{
         user.getIdTokenResult()
           .then(idTokenResult => {
             user.admin = idTokenResult.claims.admin;
+            //user.canAddValues = idTokenResult.claims.canAddValue;
+
+
+
+
             callback(user);
           })
+
+
 
 
       } else {
