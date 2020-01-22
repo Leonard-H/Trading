@@ -38,6 +38,10 @@ html, body {
   border-radius: 5px;
 }
 
+.extra-wide {
+  max-width: 80% !important;
+}
+
 .game-control {
   font-size: 1.15em;
 }

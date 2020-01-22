@@ -74,20 +74,31 @@ class Game {
 
   async joinGame(data){
 
-    db.collection("users").doc(auth.currentUser.uid).update({
-      currentSession: data.session,
-      occupiedAsAdmin: false,
-      canAddValues: false
-    })
-    .catch(err => {
-      console.log(err);
-      alert("There was an error: view console");
-    });
-
+    if (data.canAddValues){
+      db.collection("users").doc(auth.currentUser.uid).update({
+        currentSession: data.session,
+        occupiedAsAdmin: false,
+      })
+      .catch(err => {
+        console.log(err);
+        alert("There was an error: view console");
+      });
+    } else {
+      db.collection("users").doc(auth.currentUser.uid).update({
+        currentSession: data.session,
+        occupiedAsAdmin: false,
+        canAddValues: false
+      })
+      .catch(err => {
+        console.log(err);
+        alert("There was an error: view console");
+      });
+    }
 
   }
 
   async addUserValue(data){
+    console.log(data.value);
 
     db.collection("valuesOfUsers").add({
       ofSession: data.id,
