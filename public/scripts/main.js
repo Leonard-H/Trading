@@ -397,18 +397,21 @@ const setUpSession = (id, firstNum) => {
               .catch(err => console.log(err));
 
 
+              let first5 = false;
+
               //check for updates in user document
               const unsub1 = db.collection("users").doc(auth.currentUser.uid)
                 .onSnapshot(querySnapshot => {
 
 
                   // check if session ended
-                  if (!querySnapshot.data().currentSession){
+                  if (!querySnapshot.data().currentSession && first5){
                     alert("the session has ended");
                     toggleActiveCard(join);
                     setTimeout(unsub1, 1000);
                   }
 
+                  first5 = true;
 
                   if (first3){
                     // display result
