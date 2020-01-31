@@ -98,19 +98,41 @@ class Game {
   }
 
   async addUserValue(data){
-    console.log(data.value);
 
-    db.collection("valuesOfUsers").add({
-      ofSession: data.id,
-      timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-      value: data.value,
-      author: auth.currentUser.uid
-    })
-    .catch(err => {
-      console.log(err);
-      alert("There was an error: view console");
-    });
+    if (data.value < -11 || data.value > 11){
+      alert("Please make sure that the value you set is between -10 and 10.");
+      console.log(data.value);
+    } else {
 
+      db.collection("valuesOfUsers")
+        .where("ofSession", "==", data.id)
+        .where("author", "==", auth.currentUser.uid)
+        .get()
+        .then(querySnapshot => {
+
+          if (querySnapshot.docs[0]){
+
+
+            db.collection("valuesOfUsers").doc(querySnapshot.docs[0].id).update({
+              ofSession: data.id,
+              value: data.value
+            });
+
+          } else {
+
+            db.collection("valuesOfUsers").add({
+              ofSession: data.id,
+              value: data.value,
+              author: auth.currentUser.uid
+            })
+            .catch(err => console.log(err));
+          }
+
+
+        })
+        .catch(err => console.log(err));
+
+    }
 
   }
 

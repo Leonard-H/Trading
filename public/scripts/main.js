@@ -1,3 +1,8 @@
+const now = new Date();
+if (now.getDate() === 5){
+  document.querySelector(".navbar-brand").innerText = "Trading Game Turned Two Months Old Today"
+}
+
 //get references
 const start = document.querySelector(".start");
 const authDiv = document.querySelector(".auth");
@@ -210,7 +215,6 @@ const gameControlFunction = () => {
                 db.collection("valuesOfUsers")
                   .where("author", "==", user)
                   .where("ofSession", "==", data.data().currentSession)
-                  .orderBy("timestamp", "desc")
                   .get()
                   .then(querySnapshot => {
 
@@ -298,8 +302,6 @@ const setUpSession = (id, firstNum) => {
             db.collection("users").doc(auth.currentUser.uid)
               .get()
               .then(user => {
-
-                console.log(user.data());
 
                 if (user.data()[user.data().currentSession]){
                   resultDiv.innerText = `$${user.data()[user.data().currentSession]}`;
@@ -558,8 +560,8 @@ authentication.listener(user => {
         const html = `
         <form class="nameForm">
           <div class="form-group">
-            <label for="name">Type in your real name (first + last):</label>
-            <input type="text" class="form-control" id="name" placeholder="e.g. Donald Trump">
+            <label for="name">Type in a nickname:</label>
+            <input type="text" class="form-control" id="name" placeholder="nickname">
           </div>
           <button type="submit" class="btn btn-dark">Submit</button>
         </form>

@@ -124,7 +124,8 @@ span.sell, span.buy {
   margin-top: -6px;
 }
 #trade:active::-moz-range-thumb {
-  background: #fdd921;
+  background: #f10094;
+  outline: none;
 }
 #trade::-ms-track {
   width: 100%;

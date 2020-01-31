@@ -22,7 +22,7 @@ class Authentication{
       <div class="form-group">
         <label for="inputEmail">Email address</label>
         <input type="email" class="form-control" id="inputEmail" aria-describedby="emailHelp" placeholder="Enter email" required>
-        <small id="emailHelp" class="form-text text-muted">Please DON'T user your school email-address to sign up.</small>
+        <small id="emailHelp" class="form-text text-muted">Please DON'T use your school email-address to sign up.</small>
       </div>
       <div class="form-group">
         <label for="inputPassword">Password</label>
