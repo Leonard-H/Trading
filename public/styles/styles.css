@@ -2,7 +2,7 @@ html, body {
   margin: 0;
   height: 100%;
   background-color: #8dff8d;
-  overflow: hidden
+  overflow: auto;
 }
 
 
@@ -71,6 +71,50 @@ span.sell, span.buy {
   top: -5px;
 }
 
+.rankings-list {
+  height: auto;
+  max-height: 400px;
+  overflow-y: scroll;
+
+
+  -ms-overflow-style: none;  /* IE 10+ */
+  scrollbar-width: none;  /* Firefox */
+}
+
+.rankings-list::-webkit-scrollbar {
+  display: none;  /* Safari and Chrome */
+}
+
+.rankings-list > li {
+  height: 80px;
+  display: flex;
+  align-items: center;
+
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.rankings-list > li > .ranking {
+  margin: 0;
+  position: relative;
+  top: -1px;
+}
+
+.rankings-list > li > .info {
+  margin: 0;
+  line-height: 10px;
+  position: relative;
+  top: -1px;
+}
+
+.rankings-list > li > .info > small {
+  float: right;
+}
+
+.you {
+  background-color: rgb(230, 230, 230);
+}
+
 #trade  {
   -webkit-appearance: none ;
   outline: none;
@@ -122,10 +166,6 @@ span.sell, span.buy {
   border: none;
   cursor: pointer;
   margin-top: -6px;
-}
-#trade:active::-moz-range-thumb {
-  background: #f10094;
-  outline: none;
 }
 #trade::-ms-track {
   width: 100%;

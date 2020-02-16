@@ -19,6 +19,7 @@ class Game {
       currentSession: data.id,
       occupiedAsAdmin: true
     });
+    db.collection("rankings").doc(data.id).set({});
   };
 
   async addValue(data){
@@ -67,6 +68,77 @@ class Game {
     });
 
 
+  };
+
+  async updateIndividualResults(userList, chartFactor){
+
+    let userValues = {};
+
+    return new Promise((resolve, reject) => {
+
+      [...userList].forEach(async user => {
+       db.collection("valuesOfUsers")
+         .where("author", "==", user)
+         .where("ofSession", "==", localStorage.currentSessionOfAdmin)
+         .get()
+         .then(async querySnapshot => {
+
+           if (querySnapshot.docs[0] && querySnapshot.docs[0].data().value <= 10 && querySnapshot.docs[0].data().value >= -10){
+
+             const userFactor = querySnapshot.docs[0].data().value;
+
+             const result = userFactor * chartFactor === -0 ? 0 : userFactor * chartFactor;
+
+             // function for calculations
+             const calculateResult = (userData) => {
+
+               const currentSession = userData.data().currentSession;
+
+               const resultUntilNow = userData.data()[currentSession] ? userData.data()[currentSession] : 0;
+
+               return resultUntilNow + result;
+
+             };
+
+             await db.collection("users").doc(user)
+               .get()
+               .then(async userData => {
+
+                 const finalResult = calculateResult(userData);
+
+                 const resultObject = {
+                   [userData.data().currentSession]: finalResult
+                 };
+
+                 await db.collection("users").doc(userData.id).update(resultObject)
+                  .catch(err => console.log(err));
+
+
+                 userValues[userData.data().username] = finalResult;
+
+                 // return userValues for rankings if userValues are complete
+                 if (Object.keys(userValues).length === [...userList].length)
+                   resolve(userValues);
+
+               });
+
+           }
+
+         })
+           .then(() => {
+             game.enable(user);
+           })
+           .catch(err => console.log(err));
+
+     });
+
+    });
+
+  };
+
+
+  async updateRanking(data){
+    db.collection("rankings").doc(localStorage.currentSessionOfAdmin).update(data);
   };
 
 

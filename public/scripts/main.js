@@ -1,8 +1,3 @@
-const now = new Date();
-if (now.getDate() === 5){
-  document.querySelector(".navbar-brand").innerText = "Trading Game Turned Two Months Old Today"
-}
-
 //get references
 const start = document.querySelector(".start");
 const authDiv = document.querySelector(".auth");
@@ -131,6 +126,8 @@ const gameControlFunction = () => {
     .get()
     .then(data => {
 
+      localStorage.currentSessionOfAdmin = data.data().currentSession;
+
       db.collection("sessions").doc(data.data().currentSession)
         .get()
         .then(session => {
@@ -160,6 +157,7 @@ const gameControlFunction = () => {
 
 
           let userList = new Set();
+
 
           db.collection("users")
             .where("currentSession", "==", data.data().currentSession)
@@ -204,64 +202,16 @@ const gameControlFunction = () => {
               e.preventDefault();
 
 
-
               //calculations
-
               const chartFactor = addValueForm.value.value - Number(localStorage.lastChartVal);
               localStorage.lastChartVal = addValueForm.value.value;
               addValueForm.value.value = "";
 
-              [...userList].forEach(user => {
-                db.collection("valuesOfUsers")
-                  .where("author", "==", user)
-                  .where("ofSession", "==", data.data().currentSession)
-                  .get()
-                  .then(querySnapshot => {
-
-                    if (querySnapshot.docs[0] && querySnapshot.docs[0].data().value <= 10 && querySnapshot.docs[0].data().value >= -10){
-
-                      const userFactor = querySnapshot.docs[0].data().value;
-
-                      const result = userFactor * chartFactor === -0 ? 0 : userFactor * chartFactor;
-
-
-
-                      db.collection("users").doc(user)
-                        .get()
-                        .then(data => {
-
-
-                          const currentSession = data.data().currentSession;
-
-                          const resultUntilNow = data.data()[currentSession] ? data.data()[currentSession] : 0;
-                          const resultObject = {};
-
-                          const finalResult = Math.round((resultUntilNow + result)*100)/100;
-                          resultObject[data.data().currentSession] = finalResult;
-
-                          // console.log(resultObject[data.data().currentSession], data.data().username);
-
-                          db.collection("users").doc(user).update(resultObject);
-
-                        });
-
-
-
-                    }
-
-
-                  })
-                    .then(() => {
-                      game.enable(user);
-                    })
-                    .catch(err => console.log(err));
-              });
-
-              // end of calculations
-
-
-
-
+              game.updateIndividualResults(userList, chartFactor)
+                .then(userValues => {
+                  console.table(userValues);
+                  game.updateRanking(userValues);
+                })
 
         });
 
@@ -297,8 +247,8 @@ const setUpSession = (id, firstNum) => {
 
 
           if (id){
-            // backend
 
+            // backend
             db.collection("users").doc(auth.currentUser.uid)
               .get()
               .then(user => {
@@ -311,10 +261,6 @@ const setUpSession = (id, firstNum) => {
 
                 game.joinGame({ session: id, canAddValues: user.data().canAddValues})
                   .then(() => {
-
-
-
-
 
 
 
@@ -394,6 +340,38 @@ const setUpSession = (id, firstNum) => {
 
                   })
 
+                  // get rankigs
+                  db.collection("rankings").doc(ses.id)
+                    .onSnapshot(querySnapshot => {
+                      const rankingsList = document.querySelector(".rankings-list");
+
+                      const keys = Object.keys(querySnapshot.data());
+                      const sortedKeys = keys.sort((a, b) => {
+                        return querySnapshot.data()[b] - querySnapshot.data()[a];
+                      });
+
+                      rankingsList.innerHTML = "";
+
+                      sortedKeys.forEach((key, index) => {
+                        const you = key === user.data().username ? "you" : "";
+
+                        rankingsList.innerHTML += `
+
+                            <li class="list-group-item ${you}">
+
+                              <span class="ranking">${index + 1}</span>
+
+                              <div class="info">
+                                <p>${key}</p>
+                                <small class="text-muted">$${querySnapshot.data()[key]}</small>
+                              </div>
+
+                        `;
+
+                      });
+
+                    });
+
 
               })
               .catch(err => console.log(err));
@@ -418,7 +396,10 @@ const setUpSession = (id, firstNum) => {
                   if (first3){
                     // display result
 
-                    resultDiv.innerText = querySnapshot.data()[querySnapshot.data().currentSession] ? `$${querySnapshot.data()[querySnapshot.data().currentSession]}` : `$${0}`;
+                    resultDiv.innerText =
+                      querySnapshot.data()[querySnapshot.data().currentSession] ?
+                      `$${querySnapshot.data()[querySnapshot.data().currentSession]}` :
+                      `$${0}`;
 
 
 
@@ -457,30 +438,6 @@ const setUpSession = (id, firstNum) => {
     })
 
     let first3 = false;
-
-
-
-
-    // scoring
-
-    let first = false;
-
-
-
-    db.collection("users").doc(auth.currentUser.uid)
-      .onSnapshot(querySnapshot => {
-
-
-          if (first && querySnapshot.data().canAddValues === true){
-            enable();
-          }
-
-          first = true;
-
-      });
-
-
-
 
 
 };
