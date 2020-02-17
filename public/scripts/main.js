@@ -370,6 +370,8 @@ const setUpSession = (id, firstNum) => {
 
                       });
 
+                      document.querySelector(".you").scrollIntoView();
+
                     });
 
 
