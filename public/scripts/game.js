@@ -35,13 +35,23 @@ class Game {
   };
 
   async endSession(data){
-    db.collection("sessions").doc(data.id).update({
-      isLive: false
-    })
-    .catch(err => {
-      console.log(err);
-      alert("There was an error: view console");
-    });
+    db.collection("rankings").doc(data.id)
+      .get()
+      .then(rank => {
+        const keys = Object.keys(rank.data());
+        const sortedKeys = keys.sort((a, b) => {
+          return rank.data()[b] - rank.data()[a];
+        });
+        db.collection("sessions").doc(data.id).update({
+          isLive: false,
+          winner: sortedKeys[0]
+        })
+        .catch(err => {
+          console.log(err);
+          alert("There was an error: view console");
+        });
+
+      })
 
     db.collection("users")
       .where("currentSession", "==", data.id)
