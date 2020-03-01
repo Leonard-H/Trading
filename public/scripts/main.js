@@ -119,6 +119,8 @@ document.querySelector(".new-session").addEventListener("click", e => {
 })
 
 
+
+
 const gameControlFunction = () => {
 
 
@@ -128,7 +130,7 @@ const gameControlFunction = () => {
 
       localStorage.currentSessionOfAdmin = data.data().currentSession;
 
-      db.collection("sessions").doc(data.data().currentSession)
+      db.collection("sessions").doc(localStorage.currentSessionOfAdmin)
         .get()
         .then(session => {
           gameControl.innerHTML = `
@@ -160,12 +162,13 @@ const gameControlFunction = () => {
 
 
           db.collection("users")
-            .where("currentSession", "==", data.data().currentSession)
+            .where("currentSession", "==", localStorage.currentSessionOfAdmin)
             .where("occupiedAsAdmin", "==", false)
             .onSnapshot(querySnapshot => {
 
-              querySnapshot.docChanges().forEach(doc => {
-                userList.add(doc.doc.id);
+              querySnapshot.docs.forEach(doc => {
+                userList.add(doc.id);
+                localStorage.setItem("userList", JSON.stringify(Array.from(userList)));
               });
 
 
@@ -193,9 +196,6 @@ const gameControlFunction = () => {
               });
 
 
-            let chartFactor;
-
-
             // add a (chart) value
             const addValueForm = document.querySelector(".add-value");
             addValueForm.addEventListener("submit", e => {
@@ -204,6 +204,7 @@ const gameControlFunction = () => {
 
               //calculations
               const chartFactor = addValueForm.value.value - Number(localStorage.lastChartVal);
+
               localStorage.lastChartVal = addValueForm.value.value;
               addValueForm.value.value = "";
 
@@ -212,6 +213,7 @@ const gameControlFunction = () => {
                   console.table(userValues);
                   game.updateRanking(userValues);
                 })
+                .catch(err => console.log(err));
 
         });
 
@@ -228,8 +230,8 @@ const gameControlFunction = () => {
 joinForm.addEventListener("submit", e => {
   e.preventDefault();
 
-  setUpSession(joinForm.enter.value, 0);
-  // game.addUserValue({ id: joinForm.enter.value, value: null });
+  localStorage.currentSessionOfUser = joinForm.enter.value.trim();
+  setUpSession(localStorage.currentSessionOfUser, 0);
 });
 
 
@@ -262,9 +264,6 @@ const setUpSession = (id, firstNum) => {
                 game.joinGame({ session: id, canAddValues: user.data().canAddValues})
                   .then(() => {
 
-
-
-
                     join.classList.add("d-none");
                     main.classList.remove("d-none");
 
@@ -273,7 +272,8 @@ const setUpSession = (id, firstNum) => {
                     range.value = firstNum;
 
                     display.innerText = firstNum;
-                    if (!auth.currentUser.canAddValue){
+                    if (!user.data().canAddValues){
+                      console.log("disabled");
                       range.setAttribute("disabled", true);
                     }
 
@@ -316,8 +316,7 @@ const setUpSession = (id, firstNum) => {
                         localStorage.rangeVal = range.value;
                         resetDisplayStyle();
 
-
-                        game.addUserValue({ id: id, value: range.value });
+                        game.addUserValue({ id: localStorage.currentSessionOfUser, value: range.value });
 
                       }
                     });

@@ -1,0 +1,20 @@
+{
+  "name": "Trading1",
+  "version": "1.0.0",
+  "description": "An app built for investing club, on which a trading game can be played easily.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Leonard-H/Trading.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Leonard-H/Trading/issues"
+  },
+  "homepage": "https://github.com/Leonard-H/Trading#readme"
+}

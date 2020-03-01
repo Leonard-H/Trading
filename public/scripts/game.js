@@ -22,17 +22,7 @@ class Game {
     db.collection("rankings").doc(data.id).set({});
   };
 
-  async addValue(data){
-    db.collection("valuesOfChart").add({
-        ofSession: data.id,
-        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-        value: data.value
-    })
-    .catch(err => {
-      console.log(err);
-      alert("There was an error: view console");
-    });
-  };
+
 
   async endSession(data){
     db.collection("rankings").doc(data.id)
@@ -60,7 +50,8 @@ class Game {
         querySnapshot.forEach(doc => {
           db.collection("users").doc(doc.id)
             .update({
-              currentSession: ""
+              currentSession: "",
+              canAddValues: false
             });
           });
       })
@@ -86,15 +77,22 @@ class Game {
 
     return new Promise((resolve, reject) => {
 
-      [...userList].forEach(async user => {
+
+      [...userList].forEach(user => {
+
+        db.collection("users").doc(user).update({
+          canAddValues: true
+        })
+         .catch(err => console.log(err));
+
        db.collection("valuesOfUsers")
          .where("author", "==", user)
          .where("ofSession", "==", localStorage.currentSessionOfAdmin)
          .get()
-         .then(async querySnapshot => {
+         .then(querySnapshot => {
+
 
            if (querySnapshot.docs[0] && querySnapshot.docs[0].data().value <= 10 && querySnapshot.docs[0].data().value >= -10){
-
              const userFactor = querySnapshot.docs[0].data().value;
 
              const result = userFactor * chartFactor === -0 ? 0 : userFactor * chartFactor;
@@ -110,9 +108,9 @@ class Game {
 
              };
 
-             await db.collection("users").doc(user)
+             db.collection("users").doc(user)
                .get()
-               .then(async userData => {
+               .then(userData => {
 
                  const finalResult = calculateResult(userData);
 
@@ -120,7 +118,8 @@ class Game {
                    [userData.data().currentSession]: finalResult
                  };
 
-                 await db.collection("users").doc(userData.id).update(resultObject)
+                 db.collection("users").doc(userData.id).update(resultObject)
+                 .then(() => console.group("done"))
                   .catch(err => console.log(err));
 
 
@@ -132,12 +131,10 @@ class Game {
 
                });
 
+
            }
 
          })
-           .then(() => {
-             game.enable(user);
-           })
            .catch(err => console.log(err));
 
      });
@@ -180,6 +177,8 @@ class Game {
   }
 
   async addUserValue(data){
+    // data.value, data.id
+    console.log(data.id);
 
     if (data.value < -11 || data.value > 11){
       alert("Please make sure that the value you set is between -10 and 10.");
@@ -201,6 +200,8 @@ class Game {
             });
 
           } else {
+
+            console.log("justJoined");
 
             db.collection("valuesOfUsers").add({
               ofSession: data.id,
@@ -243,17 +244,6 @@ async disable(id){
     canAddValues: false
   });
 }
-
-async enable(id){
-  // const enable = functions.httpsCallable('enable');
-  // enable({ uid: id })
-  db.collection("users").doc(id).update({
-    canAddValues: true
-  });
-}
-
-
-
 
 
 }
