@@ -1,20 +1,22 @@
+import { db, auth } from "./firebase";
+
 //get references
-const start = document.querySelector(".start");
-const authDiv = document.querySelector(".auth");
+const start: HTMLDivElement = document.querySelector(".start");
+const authDiv: HTMLDivElement = document.querySelector(".auth");
 const signup = document.querySelector(".signup");
 const login = document.querySelector(".login");
 
-const gameControl = document.querySelector(".game-control");
+const gameControl: HTMLDivElement = document.querySelector(".game-control");
 
-const range = document.querySelector("input[type=\"range\"]");
+const range: HTMLInputElement = document.querySelector("input[type=\"range\"]");
 const nav = document.querySelector("nav");
 const main = document.querySelector(".main");
-const resultDiv = document.querySelector(".result");
+const resultDiv: HTMLDivElement = document.querySelector(".result");
 const account = document.querySelector(".account");
 const logout = document.querySelector(".logout-confirmed");
-const join = document.querySelector(".join-game");
-const joinForm = document.querySelector(".join-form");
-const display = document.querySelector(".display");
+const join: HTMLDivElement = document.querySelector(".join-game");
+const joinForm: HTMLFormElement = document.querySelector(".join-form");
+const display: HTMLSpanElement = document.querySelector(".display");
 
 
 
@@ -31,8 +33,8 @@ login.addEventListener("click", () => {
 
 // admin ui
 
-const toggleActiveCard = card => {
-  [...document.querySelector(".white-cards").children].forEach(child => {
+const toggleActiveCard = (card: HTMLDivElement) => {
+  Array.from(document.querySelector(".white-cards").children).forEach(child => {
     child.classList.add("d-none");
   });
   card.classList.remove("d-none");
@@ -65,16 +67,16 @@ document.querySelector(".new-session").addEventListener("click", e => {
 
   gameControl.innerHTML = htmlInitSession;
 
-  const initForm = document.querySelector(".init-session");
+  const initForm: HTMLFormElement = document.querySelector(".init-session");
 
-  let sessionId;
+  let sessionId: string;
 
   initForm.addEventListener("submit", e => {
     e.preventDefault();
 
     localStorage.lastChartVal = 0;
 
-    sessionId = initForm.sessionId.value;
+    sessionId = initForm.sessionId.value.trim();
 
     game.newSession({
       id: sessionId,
@@ -92,7 +94,7 @@ document.querySelector(".new-session").addEventListener("click", e => {
       `;
 
       const contentDiv = document.querySelector(".content-div");
-      const next = document.querySelector(".next");
+      const next: HTMLButtonElement = document.querySelector(".next");
 
       next.onclick = () => {
         setTimeout(() => next.blur(), 50);
@@ -104,7 +106,7 @@ document.querySelector(".new-session").addEventListener("click", e => {
 
 
     })
-    .catch(err => {
+    .catch((err: string) => {
       console.log(err);
       alert("There was an error: view console");
     });
@@ -126,13 +128,13 @@ const gameControlFunction = () => {
 
   db.collection("users").doc(auth.currentUser.uid)
     .get()
-    .then(data => {
+    .then((data: any) => {
 
       localStorage.currentSessionOfAdmin = data.data().currentSession;
 
       db.collection("sessions").doc(localStorage.currentSessionOfAdmin)
         .get()
-        .then(session => {
+        .then((session: any) => {
           gameControl.innerHTML = `
             <small class="text-muted" style="letter-spacing: 1.1px; float: left">
               Session id:  ${data.data().currentSession}
@@ -164,7 +166,7 @@ const gameControlFunction = () => {
           db.collection("users")
             .where("currentSession", "==", localStorage.currentSessionOfAdmin)
             .where("occupiedAsAdmin", "==", false)
-            .onSnapshot(querySnapshot => {
+            .onSnapshot((querySnapshot: { docs: any[]; }) => {
 
               querySnapshot.docs.forEach(doc => {
                 userList.add(doc.id);
@@ -179,7 +181,9 @@ const gameControlFunction = () => {
             const end = document.querySelector(".session-end-confirmed");
             end.addEventListener("click", () => {
               game.endSession({ id:  data.data().currentSession })
-                .then(toggleActiveCard(join));;
+                .then(() => {
+                  toggleActiveCard(join);
+                });
             });
 
 
@@ -187,7 +191,7 @@ const gameControlFunction = () => {
               const block = document.querySelector(".block");
               block.addEventListener("click", () => {
 
-              [...userList].forEach(user => {
+              Array.from(userList).forEach((user: string) => {
 
                   game.disable(user);
 
@@ -197,29 +201,29 @@ const gameControlFunction = () => {
 
 
             // add a (chart) value
-            const addValueForm = document.querySelector(".add-value");
+            const addValueForm: HTMLFormElement = document.querySelector(".add-value");
             addValueForm.addEventListener("submit", e => {
               e.preventDefault();
 
 
               //calculations
-              const chartFactor = addValueForm.value.value - Number(localStorage.lastChartVal);
+              const chartFactor = Number(addValueForm.value.value.trim()) - Number(localStorage.lastChartVal);
 
               localStorage.lastChartVal = addValueForm.value.value;
               addValueForm.value.value = "";
 
               game.updateIndividualResults(userList, chartFactor)
-                .then(userValues => {
+                .then((userValues: object) => {
                   console.table(userValues);
                   game.updateRanking(userValues);
                 })
-                .catch(err => console.log(err));
+                .catch((err: string) => console.log(err));
 
         });
 
 
     })
-    .catch(err => console.log(err));
+    .catch((err: string) => console.log(err));
 
 
   });
@@ -237,12 +241,12 @@ joinForm.addEventListener("submit", e => {
 
 // function which starts session ui
 
-const setUpSession = (id, firstNum) => {
+const setUpSession = (id: string, firstNum: number) => {
 
-  let enable;
+  let enable: { (): void; (): void; };
 
   db.collection("sessions").doc(id).get()
-    .then(ses => {
+    .then((ses: any) => {
       if (ses.data()){
 
         if (ses.data().isLive){
@@ -253,7 +257,7 @@ const setUpSession = (id, firstNum) => {
             // backend
             db.collection("users").doc(auth.currentUser.uid)
               .get()
-              .then(user => {
+              .then((user: any) => {
 
                 if (user.data()[user.data().currentSession]){
                   resultDiv.innerText = `$${user.data()[user.data().currentSession]}`;
@@ -269,12 +273,11 @@ const setUpSession = (id, firstNum) => {
 
                     //setup game
                     localStorage.rangeVal = firstNum;
-                    range.value = firstNum;
+                    range.value = String(firstNum);
 
-                    display.innerText = firstNum;
+                    display.innerText = String(firstNum);
                     if (!user.data().canAddValues){
-                      console.log("disabled");
-                      range.setAttribute("disabled", true);
+                      range.setAttribute("disabled", "true");
                     }
 
 
@@ -288,9 +291,9 @@ const setUpSession = (id, firstNum) => {
                       display.classList.remove("btn", "btn-dark", "font-weight-bold");
                     });
 
-                    range.addEventListener("input", e => {
+                    range.addEventListener("input", () => {
                       display.classList.remove("d-none");
-                      display.innerText = e.target.value;
+                      display.innerText = range.value;
                     });
 
                     range.addEventListener("mouseup", () => {
@@ -310,13 +313,13 @@ const setUpSession = (id, firstNum) => {
                       enable();
                     }
 
-                    display.addEventListener("click", e => {
-                      if (e.target.classList.contains("btn")){
+                    display.addEventListener("click", () => {
+                      if (display.classList.contains("btn")){
                         //range.setAgamettfribute("disabled", true);
                         localStorage.rangeVal = range.value;
                         resetDisplayStyle();
 
-                        game.addUserValue({ id: localStorage.currentSessionOfUser, value: range.value });
+                        game.addUserValue({ id: localStorage.currentSessionOfUser, value: Number(range.value) });
 
                       }
                     });
@@ -341,7 +344,7 @@ const setUpSession = (id, firstNum) => {
 
                   // get rankigs
                   db.collection("rankings").doc(ses.id)
-                    .onSnapshot(querySnapshot => {
+                    .onSnapshot((querySnapshot: any) => {
                       const rankingsList = document.querySelector(".rankings-list");
 
                       const keys = Object.keys(querySnapshot.data());
@@ -375,14 +378,14 @@ const setUpSession = (id, firstNum) => {
 
 
               })
-              .catch(err => console.log(err));
+              .catch((err: string) => console.log(err));
 
 
               let first5 = false;
 
               //check for updates in user document
               const unsub1 = db.collection("users").doc(auth.currentUser.uid)
-                .onSnapshot(querySnapshot => {
+                .onSnapshot((querySnapshot: any) => {
 
 
                   // check if session ended
@@ -407,7 +410,7 @@ const setUpSession = (id, firstNum) => {
                     if (querySnapshot.data().canAddValues){
                       enable();
                     } else {
-                      range.setAttribute("disabled", true);
+                      range.setAttribute("disabled", "true");
                     }
 
 
@@ -452,16 +455,20 @@ const setUpSession = (id, firstNum) => {
 
 
 //class instances
+import Authentication from "./auth";
 const authentication = new Authentication(authDiv);
+import Game from "./game";
 const game = new Game();
 
-const setUpUser = (user, data) => {
+const setUpUser = (user: { getIdTokenResult?: () => Promise<any>; admin: any; email?: any; }) => {
 
-  authentication.addAdminCloudFunction(document.querySelector(".add-admin-form"));
+  authentication.addAdminCloudFunction(document.querySelector(".add-admin-form"), () => {
+    toggleActiveCard(join)
+  });
 
   db.collection("users").doc(auth.currentUser.uid)
     .get()
-    .then(data => {
+    .then((data: any) => {
       account.innerHTML = `
         <span>Your email address: '${user.email}'</span><br>
         <span>Your name: '${data.data().username}'</span><br>
@@ -508,18 +515,18 @@ const setUpUser = (user, data) => {
 }
 
 
-authentication.listener(user => {
+authentication.listener((user: any) => {
 
   db.collection("users").doc(user.uid)
     .get()
-    .then(data => {
+    .then((data: any) => {
 
       const getName = () => {
         const html = `
         <form class="nameForm">
           <div class="form-group">
             <label for="name">Type in a nickname:</label>
-            <input type="text" class="form-control" id="name" placeholder="nickname">
+            <input type="text" class="form-control" id="nameInput" placeholder="nickname">
           </div>
           <button type="submit" class="btn btn-dark">Submit</button>
         </form>
@@ -528,22 +535,22 @@ authentication.listener(user => {
         authDiv.innerHTML = html;
         authDiv.classList.remove("d-none");
 
-        const form = document.querySelector(".nameForm");
+        const form: HTMLFormElement = document.querySelector(".nameForm");
 
         form.addEventListener("submit", e => {
           e.preventDefault();
 
           db.collection("users").doc(user.uid)
             .set({
-              username: form.name.value,
+              username: form.nameInput.value.trim(),
               currentSession: "",
               occupiedAsAdmin: false,
               canAddValues: false
             })
             .then(() => {
-              setUpUser(user, data);
+              setUpUser(user);
             })
-            .catch(err => console.log(err));
+            .catch((err: string) => console.log(err));
 
           });
       };
@@ -552,16 +559,16 @@ authentication.listener(user => {
 
       if (data.data()){
         if (data.data().username){
-          setUpUser(user, data);
+          setUpUser(user);
         } else {
           getName();
-          setUpUser(user, data);
+          setUpUser(user);
         }
       } else {
         getName();
         db.collection("users").doc(auth.currentUser.uid).get()
-          .then(data => {
-            setUpUser(user, data);
+          .then(() => {
+            setUpUser(user);
           })
       }
     })

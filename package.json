@@ -4,7 +4,8 @@
   "description": "An app built for investing club, on which a trading game can be played easily.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "webpack": "node_modules/.bin/webpack -w",
+    "tsc": "tsc --watch"
   },
   "repository": {
     "type": "git",
@@ -16,5 +17,12 @@
   "bugs": {
     "url": "https://github.com/Leonard-H/Trading/issues"
   },
-  "homepage": "https://github.com/Leonard-H/Trading#readme"
+  "homepage": "https://github.com/Leonard-H/Trading#readme",
+  "devDependencies": {
+    "webpack": "^4.41.6",
+    "webpack-cli": "^3.3.11"
+  },
+  "dependencies": {
+    "firebase": "^7.9.3"
+  }
 }

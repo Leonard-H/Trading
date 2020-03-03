@@ -1,17 +1,19 @@
+import { firebase, db, auth } from "./firebase";
+
 class Game {
   constructor(){
 
   }
 
   // admin
-  async newSession(data){
+  async newSession(data: { id: any; stockName: any; }){
     db.collection("sessions").doc(data.id).set({
       isLive: true,
       stock: data.stockName,
       timestamp: firebase.firestore.FieldValue.serverTimestamp(),
       creator: auth.currentUser.uid
     })
-    .catch(err => {
+    .catch((err: string) => {
       console.log(err);
       alert("There was an error: view console");
     });
@@ -24,10 +26,10 @@ class Game {
 
 
 
-  async endSession(data){
+  async endSession(data: { id: any; }){
     db.collection("rankings").doc(data.id)
       .get()
-      .then(rank => {
+      .then((rank: any) => {
         const keys = Object.keys(rank.data());
         const sortedKeys = keys.sort((a, b) => {
           return rank.data()[b] - rank.data()[a];
@@ -36,7 +38,7 @@ class Game {
           isLive: false,
           winner: sortedKeys[0]
         })
-        .catch(err => {
+        .catch((err: string) => {
           console.log(err);
           alert("There was an error: view console");
         });
@@ -46,8 +48,8 @@ class Game {
     db.collection("users")
       .where("currentSession", "==", data.id)
       .get()
-      .then(querySnapshot => {
-        querySnapshot.forEach(doc => {
+      .then((querySnapshot: any) => {
+        querySnapshot.forEach((doc: any) => {
           db.collection("users").doc(doc.id)
             .update({
               currentSession: "",
@@ -55,7 +57,7 @@ class Game {
             });
           });
       })
-      .catch(err => {
+      .catch((err: string) => {
         console.log(err);
         alert("There was an error: view console");
       });
@@ -63,7 +65,7 @@ class Game {
     db.collection("users").doc(auth.currentUser.uid).update({
       occupiedAsAdmin: false
     })
-    .catch(err => {
+    .catch((err: string) => {
       console.log(err);
       alert("There was an error: view console");
     });
@@ -71,25 +73,26 @@ class Game {
 
   };
 
-  async updateIndividualResults(userList, chartFactor){
+  async updateIndividualResults(userList: any, chartFactor: number){
 
     let userValues = {};
 
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
 
 
-      [...userList].forEach(user => {
+      Array.from(userList).forEach((user: string) => {
 
         db.collection("users").doc(user).update({
           canAddValues: true
         })
-         .catch(err => console.log(err));
+          .then(() => console.log("successfully updated user: " + user))
+          .catch((err: string) => console.log(err));
 
        db.collection("valuesOfUsers")
          .where("author", "==", user)
          .where("ofSession", "==", localStorage.currentSessionOfAdmin)
          .get()
-         .then(querySnapshot => {
+         .then((querySnapshot: any) => {
 
 
            if (querySnapshot.docs[0] && querySnapshot.docs[0].data().value <= 10 && querySnapshot.docs[0].data().value >= -10){
@@ -98,7 +101,7 @@ class Game {
              const result = userFactor * chartFactor === -0 ? 0 : userFactor * chartFactor;
 
              // function for calculations
-             const calculateResult = (userData) => {
+             const calculateResult = (userData: { data: () => { (): any; new(): any;[x: string]: any; currentSession: any; }; }) => {
 
                const currentSession = userData.data().currentSession;
 
@@ -110,7 +113,7 @@ class Game {
 
              db.collection("users").doc(user)
                .get()
-               .then(userData => {
+               .then((userData: { data: any; id?: any; }) => {
 
                  const finalResult = calculateResult(userData);
 
@@ -120,7 +123,7 @@ class Game {
 
                  db.collection("users").doc(userData.id).update(resultObject)
                  .then(() => console.group("done"))
-                  .catch(err => console.log(err));
+                  .catch((err: string) => console.log(err));
 
 
                  userValues[userData.data().username] = finalResult;
@@ -135,7 +138,7 @@ class Game {
            }
 
          })
-           .catch(err => console.log(err));
+           .catch((err: string) => console.log(err));
 
      });
 
@@ -144,21 +147,21 @@ class Game {
   };
 
 
-  async updateRanking(data){
+  async updateRanking(data: any){
     db.collection("rankings").doc(localStorage.currentSessionOfAdmin).update(data);
   };
 
 
   // genereal
 
-  async joinGame(data){
+  async joinGame(data: { canAddValues: any; session: any; }){
 
     if (data.canAddValues){
       db.collection("users").doc(auth.currentUser.uid).update({
         currentSession: data.session,
         occupiedAsAdmin: false,
       })
-      .catch(err => {
+      .catch((err: string) => {
         console.log(err);
         alert("There was an error: view console");
       });
@@ -168,7 +171,7 @@ class Game {
         occupiedAsAdmin: false,
         canAddValues: false
       })
-      .catch(err => {
+      .catch((err: string) => {
         console.log(err);
         alert("There was an error: view console");
       });
@@ -176,7 +179,7 @@ class Game {
 
   }
 
-  async addUserValue(data){
+  async addUserValue(data: { id: any; value: number; }){
     // data.value, data.id
     console.log(data.id);
 
@@ -189,7 +192,7 @@ class Game {
         .where("ofSession", "==", data.id)
         .where("author", "==", auth.currentUser.uid)
         .get()
-        .then(querySnapshot => {
+        .then((querySnapshot: { docs: { id: any; }[]; }) => {
 
           if (querySnapshot.docs[0]){
 
@@ -208,19 +211,19 @@ class Game {
               value: data.value,
               author: auth.currentUser.uid
             })
-            .catch(err => console.log(err));
+            .catch((err: string) => console.log(err));
           }
 
 
         })
-        .catch(err => console.log(err));
+        .catch((err: string) => console.log(err));
 
     }
 
   }
 
 
-  async createStockValueIdsArray(querySnapshot, callback){
+  async createStockValueIdsArray(querySnapshot: { docs: any[]; }, callback: (arg0: any[]) => void){
 
 
     let stockValueIds = [];
@@ -235,15 +238,15 @@ class Game {
     });
 
     callback(stockValueIds);
+  }
+
+  async disable(id: string){
+    // const disable = functions.httpsCallable('disable');
+    // disable({ uid: id })
+    db.collection("users").doc(id).update({
+      canAddValues: false
+    });
+  }
 }
 
-async disable(id){
-  // const disable = functions.httpsCallable('disable');
-  // disable({ uid: id })
-  db.collection("users").doc(id).update({
-    canAddValues: false
-  });
-}
-
-
-}
+export default Game;

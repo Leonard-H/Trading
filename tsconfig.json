@@ -1,0 +1,19 @@
+{
+"compileOnSave": true,
+"compilerOptions": {
+    "target": "es3",
+    "module": "commonjs",
+    "declaration": false,
+    "noImplicitAny": false,
+    "removeComments": true,
+    "noLib": false,
+    "outDir": "ts-built",
+    "rootDir": "src"
+},
+"include": [
+    "./src/*"
+],
+"exclude": [
+    "node_modules",
+    "**/*.spec.ts"
+]}

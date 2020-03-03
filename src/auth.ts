@@ -1,16 +1,23 @@
+import { auth, functions } from "./firebase";
+
+interface Authentication {
+  div: HTMLDivElement,
+  user: any
+}
+
 class Authentication{
-  constructor(div){
+  constructor(div: HTMLDivElement){
     this.div = div;
   }
-  addAdminCloudFunction(adminForm){
+  addAdminCloudFunction(adminForm: HTMLFormElement, callback: () => void){
     adminForm.addEventListener('submit', e => {
       e.preventDefault();
       const adminEmail = adminForm.email.value;
       const addAdminRole = functions.httpsCallable('addAdminRole');
-      addAdminRole({ email: adminEmail }).then(result => {
+      addAdminRole({ email: adminEmail }).then((result: any) => {
         console.log(result);
-        toggleActiveCard(join);
-      }).catch(err => {
+        callback();
+      }).catch((err: string) => {
         console.log(err);
         alert("There was an error: view console");
       });
@@ -40,7 +47,7 @@ class Authentication{
 
     this.div.innerHTML = html;
 
-    const form = document.querySelector(".signup-form");
+    const form: HTMLFormElement = document.querySelector(".signup-form");
 
     const email = form.inputEmail;
     const password = form.inputPassword;
@@ -57,7 +64,7 @@ class Authentication{
         this.div.classList.add("d-none");
 
         auth.createUserWithEmailAndPassword(email.value, password.value)
-          .catch(err => {
+          .catch((err: string) => {
             error.textContent = err;
             error.classList.remove("d-none");
           });
@@ -93,7 +100,7 @@ class Authentication{
 
     this.div.innerHTML = html;
 
-    const form = document.querySelector(".login-form");
+    const form: HTMLFormElement = document.querySelector(".login-form");
 
     const email = form.inputEmail;
     const password = form.inputPassword;
@@ -106,30 +113,24 @@ class Authentication{
 
       //login
       auth.signInWithEmailAndPassword(email.value, password.value)
-        .catch(err => {
+        .catch((err: string) => {
           error.textContent = err;
           error.classList.remove("d-none");
         });
     });
   }
-  listener(callback){
+  listener(callback: (arg0: { getIdTokenResult: () => Promise<any>; admin: any; }) => void){
 
-    auth.onAuthStateChanged(user => {
+    auth.onAuthStateChanged((user: any) => {
       if (user){
 
         user.getIdTokenResult()
-          .then(idTokenResult => {
+          .then((idTokenResult: any) => {
             user.admin = idTokenResult.claims.admin;
             //user.canAddValues = idTokenResult.claims.canAddValue;
 
-
-
-
             callback(user);
           })
-
-
-
 
       } else {
         this.div.innerHTML = "";
@@ -138,3 +139,5 @@ class Authentication{
     });
   }
 }
+
+export default Authentication;
