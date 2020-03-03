@@ -174,7 +174,7 @@ var Game = (function () {
                 if (data.canAddValues) {
                     firebase_1.db.collection("users").doc(firebase_1.auth.currentUser.uid).update({
                         currentSession: data.session,
-                        occupiedAsAdmin: false,
+                        occupiedAsAdmin: false
                     })["catch"](function (err) {
                         console.log(err);
                         alert("There was an error: view console");
@@ -235,7 +235,7 @@ var Game = (function () {
                 stockValueIds = [];
                 querySnapshot.docs.forEach(function (doc) {
                     stockValueIds.push({
-                        value: doc.data().value,
+                        value: doc.data().value
                     });
                 });
                 callback(stockValueIds);

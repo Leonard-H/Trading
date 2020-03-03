@@ -34,7 +34,7 @@ login.addEventListener("click", () => {
 // admin ui
 
 const toggleActiveCard = (card: HTMLDivElement) => {
-  Array.from(document.querySelector(".white-cards").children).forEach(child => {
+  [...document.querySelector(".white-cards").children].forEach((child: HTMLDivElement) => {
     child.classList.add("d-none");
   });
   card.classList.remove("d-none");

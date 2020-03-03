@@ -1,4 +1,11 @@
 "use strict";
+var __spreadArrays = (this && this.__spreadArrays) || function () {
+    for (var s = 0, i = 0, il = arguments.length; i < il; i++) s += arguments[i].length;
+    for (var r = Array(s), k = 0, i = 0; i < il; i++)
+        for (var a = arguments[i], j = 0, jl = a.length; j < jl; j++, k++)
+            r[k] = a[j];
+    return r;
+};
 exports.__esModule = true;
 var firebase_1 = require("./firebase");
 var start = document.querySelector(".start");
@@ -22,7 +29,7 @@ login.addEventListener("click", function () {
     authentication.login();
 });
 var toggleActiveCard = function (card) {
-    Array.from(document.querySelector(".white-cards").children).forEach(function (child) {
+    __spreadArrays(document.querySelector(".white-cards").children).forEach(function (child) {
         child.classList.add("d-none");
     });
     card.classList.remove("d-none");
