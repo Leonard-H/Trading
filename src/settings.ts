@@ -1,4 +1,4 @@
-const settingsBtn: HTMLButtonElement = document.querySelector(".settings-btn");
+const settingsBtn: HTMLLinkElement = document.querySelector(".settings-btn");
 
 settingsBtn.addEventListener("click", () => {
   const html = `
@@ -14,7 +14,9 @@ settingsBtn.addEventListener("click", () => {
   Array.from(whiteCards.children).forEach((child: HTMLDivElement) => {
     child.classList.add("d-none");
   });
-  whiteCards.innerHTML += html;
+  if (!Array.from(whiteCards.children).contains(document.querySelector(".settings"))){
+    whiteCards.innerHTML += html;
+  }
   const settings = document.querySelector(".settings");
 });
 

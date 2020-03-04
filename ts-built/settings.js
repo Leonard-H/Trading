@@ -7,7 +7,9 @@ settingsBtn.addEventListener("click", function () {
     Array.from(whiteCards.children).forEach(function (child) {
         child.classList.add("d-none");
     });
-    whiteCards.innerHTML += html;
+    if (!Array.from(whiteCards.children).contains(document.querySelector(".settings"))) {
+        whiteCards.innerHTML += html;
+    }
     var settings = document.querySelector(".settings");
 });
 exports["default"] = {};

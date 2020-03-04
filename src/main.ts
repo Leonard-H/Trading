@@ -34,7 +34,7 @@ login.addEventListener("click", () => {
 // admin ui
 
 const toggleActiveCard = (card: HTMLDivElement) => {
-  [...document.querySelector(".white-cards").children].forEach((child: HTMLDivElement) => {
+  Array.from(document.querySelector(".white-cards").children).forEach((child: HTMLDivElement) => {
     child.classList.add("d-none");
   });
   card.classList.remove("d-none");
@@ -455,6 +455,7 @@ const setUpSession = (id: string, firstNum: number) => {
 
 
 //class instances
+import "./settings";
 import Authentication from "./auth";
 const authentication = new Authentication(authDiv);
 import Game from "./game";
