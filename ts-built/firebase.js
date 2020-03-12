@@ -21,3 +21,4 @@ var db = firebase.firestore();
 exports.db = db;
 var functions = firebase.functions();
 exports.functions = functions;
+console.log(auth);

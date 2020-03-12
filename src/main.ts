@@ -1,5 +1,5 @@
 import { db, auth } from "./firebase";
-
+console.log(db, auth);
 //get references
 const start: HTMLDivElement = document.querySelector(".start");
 const authDiv: HTMLDivElement = document.querySelector(".auth");
@@ -445,12 +445,6 @@ const setUpSession = (id: string, firstNum: number) => {
 
 
 };
-
-
-
-
-
-
 
 
 

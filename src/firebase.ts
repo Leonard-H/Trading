@@ -20,6 +20,8 @@ const auth = firebase.auth();
 const db = firebase.firestore();
 const functions = firebase.functions();
 
+console.log(auth);
+
 export {
   auth,
   db,

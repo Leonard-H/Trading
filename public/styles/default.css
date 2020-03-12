@@ -1,20 +1,19 @@
 html, body {
-  background-color: rgb(30, 30, 30);
-  color: lime;
+  background-color: #8dff8d;
 }
 
 .white-card {
   max-width: 800px;
   margin: 60px auto;
   font-size: 1.4em;
-  background-color: rgb(50, 50, 55);
+  background-color: white;
   padding: 20px;
   border-radius: 5px;
 }
 
 span.sell, span.buy {
   font-size: 1.3em;
-  color: lime;
+  color: rgb(20, 20, 20);
   position: relative;
   top: -5px;
 }
@@ -30,7 +29,7 @@ span.sell, span.buy {
   appearance: none ;
   border-radius: 5px;
   /* box-shadow: inset 1px 1px 1px rgba(000,000,000,0.10); */
-  background-color: lime;
+  background-color: rgb(180, 180, 180);
   height: 8px;
   vertical-align:middle;
   border: none;
