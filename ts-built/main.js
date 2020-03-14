@@ -1,7 +1,6 @@
 "use strict";
 exports.__esModule = true;
 var firebase_1 = require("./firebase");
-console.log(firebase_1.db, firebase_1.auth);
 var start = document.querySelector(".start");
 var authDiv = document.querySelector(".auth");
 var signup = document.querySelector(".signup");

@@ -38,7 +38,7 @@
 
         <!-- Modal footer -->
         <div class="modal-footer">
-          <button type="button" class="btn btn-dark" data-dismiss="modal">Close</button>
+          <button type="button" class="btn themeButton" data-dismiss="modal">Close</button>
         </div>
 
       </div>
@@ -58,7 +58,7 @@
         <!-- Modal footer -->
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-dismiss="modal">cancel</button>
-          <button type="button" class="btn btn-dark logout-confirmed" data-dismiss="modal">logout</button>
+          <button type="button" class="btn themeButton logout-confirmed" data-dismiss="modal">logout</button>
         </div>
 
       </div>
@@ -78,7 +78,7 @@
         <!-- Modal footer -->
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-dismiss="modal">cancel</button>
-          <button type="button" class="btn btn-dark session-end-confirmed" data-dismiss="modal">end</button>
+          <button type="button" class="btn themeButton session-end-confirmed" data-dismiss="modal">end</button>
         </div>
 
       </div>
@@ -105,8 +105,8 @@
   <div class="container">
 
   <div class="start text-center">
-    <button class="signup btn btn-dark">signup</button>
-    <button class="login btn btn-dark">login</button>
+    <button class="signup btn themeButton">signup</button>
+    <button class="login btn themeButton">login</button>
     <div class="auth text-left"></div>
   </div>
 
@@ -117,7 +117,7 @@
       <div class="input-group">
         <input type="email" class="form-control" id="email" aria-describedby="emailHelp" placeholder="Enter email">
         <div class="input-group-append">
-          <button type="submit" class="btn btn-dark">Submit</button>
+          <button type="submit" class="btn themeButton">Submit</button>
         </div>
       </div>
     </form>
@@ -137,9 +137,9 @@
     </div>
 
     <div class="settings d-none white-card">
-      <form class="theme">
+      <form class="theme-form">
 
-        <h2>Choose your theme (currently still not working)</h2>
+        <h2>Choose your theme (please reload after submitting)</h2>
 
         <input id="default" value="default" type="radio" name="theme"/>
         <label for="default">Default</label>
@@ -147,10 +147,6 @@
 
         <input id="dark" value="dark" type="radio" name="theme"/>
         <label for="dark">Dark (Experimental)</label>
-        <br>
-
-        <input type="submit" />
-
       </form>
     </div>
 
@@ -191,6 +187,12 @@
   <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
 
-  <script src="bundle.js"></script>
+  <!-- firbase -->
+  <script src="https://www.gstatic.com/firebasejs/7.11.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/7.11.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/7.11.0/firebase-firestore.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/7.11.0/firebase-functions.js"></script>
+
+  <script src="assets/bundle.js"></script>
 </body>
 </html>

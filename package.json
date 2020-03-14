@@ -4,8 +4,9 @@
   "description": "An app built for investing club, on which a trading game can be played easily.",
   "main": "index.js",
   "scripts": {
-    "webpack": "node_modules/.bin/webpack --watch",
-    "tsc": "tsc --watch"
+    "build": "node_modules/.bin/webpack --mode production",
+    "tsc": "tsc --watch",
+    "serve": "webpack-dev-server --mode development"
   },
   "repository": {
     "type": "git",
@@ -23,6 +24,6 @@
     "webpack-cli": "^3.3.11"
   },
   "dependencies": {
-    "firebase": "^7.9.3"
+    "webpack-dev-server": "^3.2.1"
   }
 }
