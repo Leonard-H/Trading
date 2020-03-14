@@ -59,6 +59,7 @@ document.querySelector(".new-session").addEventListener("click", function (e) {
             };
         })["catch"](function (err) {
             console.log(err);
+            console.log("newSession has failed");
             alert("There was an error: view console");
         });
     });
@@ -80,8 +81,8 @@ var gameControlFunction = function () {
                 .onSnapshot(function (querySnapshot) {
                 querySnapshot.docs.forEach(function (doc) {
                     userList.add(doc.id);
-                    localStorage.setItem("userList", JSON.stringify(Array.from(userList)));
                 });
+                localStorage.setItem("userList", JSON.stringify(userList));
             });
             var end = document.querySelector(".session-end-confirmed");
             end.addEventListener("click", function () {
@@ -92,7 +93,7 @@ var gameControlFunction = function () {
             });
             var block = document.querySelector(".block");
             block.addEventListener("click", function () {
-                Array.from(userList).forEach(function (user) {
+                userList.forEach(function (user) {
                     game.disable(user);
                 });
             });
@@ -106,9 +107,15 @@ var gameControlFunction = function () {
                     .then(function (userValues) {
                     console.table(userValues);
                     game.updateRanking(userValues);
-                })["catch"](function (err) { return console.log(err); });
+                })["catch"](function (err) {
+                    console.log("updateIndividualResults has failed");
+                    console.log(err);
+                });
             });
-        })["catch"](function (err) { return console.log(err); });
+        })["catch"](function (err) {
+            console.log("getting firestore rankings has failed in main.ts");
+            console.log(err);
+        });
     });
 };
 joinForm.addEventListener("submit", function (e) {

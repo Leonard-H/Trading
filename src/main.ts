@@ -1,5 +1,7 @@
 import { db, auth } from "./firebase";
 console.log(db, auth);
+
+
 //get references
 const start: HTMLDivElement = document.querySelector(".start");
 const authDiv: HTMLDivElement = document.querySelector(".auth");
@@ -108,14 +110,11 @@ document.querySelector(".new-session").addEventListener("click", e => {
     })
     .catch((err: string) => {
       console.log(err);
+      console.log("newSession has failed")
       alert("There was an error: view console");
     });
 
-
-
-
   });
-
 
   toggleActiveCard(gameControl);
 })
@@ -162,7 +161,6 @@ const gameControlFunction = () => {
 
           let userList = new Set();
 
-
           db.collection("users")
             .where("currentSession", "==", localStorage.currentSessionOfAdmin)
             .where("occupiedAsAdmin", "==", false)
@@ -170,11 +168,8 @@ const gameControlFunction = () => {
 
               querySnapshot.docs.forEach(doc => {
                 userList.add(doc.id);
-                localStorage.setItem("userList", JSON.stringify(Array.from(userList)));
               });
-
-
-
+              localStorage.setItem("userList", JSON.stringify(userList));
             });
 
             // end the session
@@ -191,7 +186,7 @@ const gameControlFunction = () => {
               const block = document.querySelector(".block");
               block.addEventListener("click", () => {
 
-              Array.from(userList).forEach((user: string) => {
+              userList.forEach((user: string) => {
 
                   game.disable(user);
 
@@ -217,13 +212,19 @@ const gameControlFunction = () => {
                   console.table(userValues);
                   game.updateRanking(userValues);
                 })
-                .catch((err: string) => console.log(err));
+                .catch((err: string) => {
+                  console.log("updateIndividualResults has failed");
+                  console.log(err);
+                });
 
         });
 
 
     })
-    .catch((err: string) => console.log(err));
+    .catch((err: string) => {
+      console.log("getting firestore rankings has failed in main.ts");
+      console.log(err);
+    });
 
 
   });
@@ -338,8 +339,6 @@ const setUpSession = (id: string, firstNum: number) => {
                         display.classList.add("btn", "btn-dark");
                       }
                     });
-
-
                   })
 
                   // get rankigs
@@ -485,6 +484,7 @@ const setUpUser = (user: { getIdTokenResult?: () => Promise<any>; admin: any; em
       start.classList.add("d-none");
 
       // show users last activity
+
       if (data.data().currentSession && data.data().occupiedAsAdmin){
 
         gameControlFunction();
